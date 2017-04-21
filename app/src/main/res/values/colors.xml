@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#FF4081</color>
+
+   <!-- http://www.rapidtables.com/web/color/green-color.htm -->
+    <color name="colorWhite">#FFFFFF</color>
+    <color name="colorlightGgreen">#90EE90</color>
+    <color name="colorGreen">#008000</color>
+    <color name="colorDarkGreen">#006400</color>
+
+    <color name="colorlightSkyBlue">#87CEFA</color>
+    <color name="colordodgerblue">#1E90FF</color>
+    <color name="colorblue">#0000FF</color>
+
+    <color name="colorlightGray">#D3D3D3</color>
+    <color name="colorGray">#A9A9A9</color>
+    <color name="colordarkGray">#808080</color>
+
+    <color name="colorblack">#000000</color>
+
+
+</resources>

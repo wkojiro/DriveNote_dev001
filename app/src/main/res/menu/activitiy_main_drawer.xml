@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_hobby"
+            android:icon="@drawable/ic_menu_camera"
+            android:title="趣味"/>
+        <item
+            android:id="@+id/nav_life"
+            android:icon="@drawable/ic_menu_gallery"
+            android:title="生活"/>
+        <item
+            android:id="@+id/nav_health"
+            android:icon="@drawable/ic_menu_slideshow"
+            android:title="健康"/>
+        <item
+            android:id="@+id/nav_compter"
+            android:icon="@drawable/ic_menu_manage"
+            android:title="コンピューター"/>
+    </group>
+
+    <item android:title="Communicate">
+        <menu>
+            <item
+                android:id="@+id/nav_share"
+                android:icon="@drawable/ic_menu_share"
+                android:title="Share"/>
+            <item
+                android:id="@+id/nav_send"
+                android:icon="@drawable/ic_menu_send"
+                android:title="Send"/>
+        </menu>
+    </item>
+
+
+
+    <item android:title="Configuration">
+        <menu>
+            <item
+                android:id="@+id/logout"
+                android:icon="@drawable/ic_menu_share"
+                android:title="ログアウト"/>
+
+        </menu>
+    </item>
+</menu>
