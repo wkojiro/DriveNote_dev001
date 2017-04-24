@@ -1,6 +1,7 @@
 package jp.techacademy.wakabayashi.kojiro.drivenote_dev001;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.location.Location;
 import android.preference.PreferenceManager;
 
@@ -14,7 +15,7 @@ import java.util.Date;
 
 
 
-class Utils {
+public class Utils {
 
    // static final String KEY_REQUESTING_LOCATION_UPDATES = "requesting_locaction_updates";
 
@@ -23,7 +24,7 @@ class Utils {
      *
      * @param context The {@link Context}.
      */
-    static boolean requestingLocationUpdates(Context context) {
+    public static boolean requestingLocationUpdates(Context context) {
         return PreferenceManager.getDefaultSharedPreferences(context)
                 .getBoolean(Const.LocationUpDateKEY, false);
     }
@@ -32,7 +33,7 @@ class Utils {
      * Stores the location updates state in SharedPreferences.
      * @param requestingLocationUpdates The location updates state.
      */
-    static void setRequestingLocationUpdates(Context context, boolean requestingLocationUpdates) {
+    public static void setRequestingLocationUpdates(Context context, boolean requestingLocationUpdates) {
         PreferenceManager.getDefaultSharedPreferences(context)
                 .edit()
                 .putBoolean(Const.LocationUpDateKEY, requestingLocationUpdates)
@@ -41,14 +42,14 @@ class Utils {
 
 
     //memo: 外部からアクセスできるようにPublicにしていたらダメだった。staticにしたらできた
-    static boolean isEmptyUser(Context context) {
+    public static boolean isEmptyUser(Context context) {
 
         return (PreferenceManager.getDefaultSharedPreferences(context).getString(Const.EmailKEY, "").equals("")
                 && PreferenceManager.getDefaultSharedPreferences(context).getString(Const.TokenKey, "").equals(""));
 
     }
 
-    static boolean isEmptyDest(Context context){
+    public static boolean isEmptyDest(Context context){
 
 
         return(PreferenceManager.getDefaultSharedPreferences(context).getString(Const.DestnameKEY, "").equals("")
@@ -60,17 +61,30 @@ class Utils {
 
     }
 
-    static boolean notGoing(Context context){
-
-        return false;
+    public static void setOnGoing(Context context, boolean onGoing) {
+        PreferenceManager.getDefaultSharedPreferences(context)
+                .edit()
+                .putBoolean(Const.OngoingKEY, onGoing)
+                .apply();
+    }
+    public static boolean onGoing(Context context){
+        return PreferenceManager.getDefaultSharedPreferences(context).getBoolean(Const.OngoingKEY,false);
     }
 
+
+    public static void deleteThisDest(Context context) {
+        //memo: 目的地を追加する際にすでにある目的地を消し、その後に追加する。
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        //sp.registerOnSharedPreferenceChangeListener(this);
+        sp.edit().remove("id").remove("position_id").remove("destname").remove("destaddress").remove("destemail").remove("latitude").remove("longitude").apply();
+
+    }
 
     /**
      * Returns the {@code location} object as a human readable string.
      * @param location  The {@link Location}.
      */
-    static String getLocationText(Location location) {
+    public static String getLocationText(Location location) {
         return location == null ? "Unknown location" :
                 "(" + location.getLatitude() + ", " + location.getLongitude() + ")";
     }

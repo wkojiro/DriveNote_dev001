@@ -6,6 +6,9 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <!-- Toolarのスタイル -->
+
+
     </style>
 
     <style name="AppTheme.NoActionBar">
@@ -16,5 +19,12 @@
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar"/>
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light"/>
+
+
+    <!-- 結局使っていない-->
+    <style name="MyApp.Toolbar" parent="Widget.AppCompat.Toolbar">
+        <item name="android:paddingBottom">@dimen/app_bar_height</item>
+
+    </style>
 
 </resources>

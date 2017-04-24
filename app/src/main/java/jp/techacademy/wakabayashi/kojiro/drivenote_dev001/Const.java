@@ -19,6 +19,7 @@ public class Const {
     public static final String DestLatitudeKEY = "latitude";
     public static final String DestLongitudeKEY = "longitude";
     public static final String ODISTANCEKEY = "originaldistance";
+    public static final String OngoingKEY = "ongoing";
 
 
 }

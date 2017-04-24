@@ -1,5 +1,6 @@
 package jp.techacademy.wakabayashi.kojiro.drivenote_dev001;
 
+import android.app.FragmentManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -39,33 +40,21 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-/**
- * The only activity in this sample.
- *
- * Note: for apps running in the background on "O" devices (regardless of the targetSdkVersion),
- * location may be computed less frequently than requested when the app is not in the foreground.
- * Apps that use a foreground service -  which involves displaying a non-dismissable
- * notification -  can bypass the background location limits and request location updates as before.
- *
- * This sample uses a long-running bound and started service for location updates. The service is
- * aware of foreground status of this activity, which is the only bound client in
- * this sample. After requesting location updates, when the activity ceases to be in the foreground,
- * the service promotes itself to a foreground service and continues receiving location updates.
- * When the activity comes back to the foreground, the foreground service stops, and the
- * notification associated with that foreground service is removed.
- *
- * While the foreground service notification is displayed, the user has the option to launch the
- * activity from the notification. The user can also remove location updates directly from the
- * notification. This dismisses the notification and stops the service.
- */
-public class MainActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
+import com.google.android.gms.maps.MapFragment;
+
+import bolts.Continuation;
+import bolts.Task;
+import jp.techacademy.wakabayashi.kojiro.drivenote_dev001.fragments.GmapFragment;
+
+
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     private static final String TAG = MainActivity.class.getSimpleName();
 
     // Used in checking for runtime permissions.
     private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 34;
 
     // The BroadcastReceiver used to listen from broadcasts from the service.
-    private MyReceiver myReceiver;
+   // private MyReceiver myReceiver;
 
     // A reference to the service used to get location updates.
     private LocationUpdatesService mService = null;
@@ -81,7 +70,13 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     private Toolbar mToolbar;
     private int mGenre = 0;
 
+    // Preference elements
+
+    private String email,token,destname,destemail,destaddress,latitude,longitude;
+
     // Monitors the state of the connection to the service.
+
+    /***** go to fragment
     private final ServiceConnection mServiceConnection = new ServiceConnection() {
 
         @Override
@@ -100,16 +95,22 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         }
     };
 
+    */
+
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        myReceiver = new MyReceiver();
+       // myReceiver = new MyReceiver();
         setContentView(R.layout.activity_main);
+
+
+
 
         // ツールバーをアクションバーとしてセット
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(mToolbar);
 
+        /*
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -118,6 +119,9 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 
             }
         });
+        */
+
+
 
         // ナビゲーションドロワーの設定
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -126,30 +130,8 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         toggle.syncState();
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(MenuItem item) {
-                int id = item.getItemId();
+        navigationView.setNavigationItemSelectedListener(this);
 
-                if (id == R.id.nav_hobby) {
-                    mToolbar.setTitle("趣味");
-                    mGenre = 1;
-                } else if (id == R.id.nav_life) {
-                    mToolbar.setTitle("生活");
-                    mGenre = 2;
-                } else if (id == R.id.nav_health) {
-                    mToolbar.setTitle("健康");
-                    mGenre = 3;
-                } else if (id == R.id.nav_compter) {
-                    mToolbar.setTitle("コンピューター");
-                    mGenre = 4;
-                }
-
-                DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-                drawer.closeDrawer(GravityCompat.START);
-                return true;
-            }
-        });
 
 
 
@@ -158,13 +140,91 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         mTextView.setText("ddd");
 
         // Check that the user hasn't revoked permissions by going to Settings.
+        /**** go to fragment
         if (Utils.requestingLocationUpdates(this)) {
             if (!checkPermissions()) {
                 requestPermissions();
             }
         }
+        */
+
+        FragmentManager fm = getFragmentManager();
+        // fm.beginTransaction().replace(R.id.content_frame, new MainFragment()).commit();
+        fm.beginTransaction().replace(R.id.content_frame, new GmapFragment()).commit();
     }
 
+    @SuppressWarnings("StatementWithEmptyBody")
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        // Handle navigation view item clicks here.
+
+        FragmentManager fm = getFragmentManager();
+
+        int id = item.getItemId();
+
+        if (id == R.id.nav_hobby) {
+            // Handle the camera action
+            // fm.beginTransaction().replace(R.id, new ImportFragment()).commit();
+            fm.beginTransaction().replace(R.id.content_frame, new MapFragment()).commit();
+        } else if (id == R.id.nav_life) {
+
+
+        } else if (id == R.id.nav_health) {
+
+        } else if (id == R.id.nav_compter) {
+
+        } else if (id == R.id.nav_share) {
+
+        } else if (id == R.id.nav_send) {
+
+        } else if (id == R.id.logout){
+
+            new ApiBase(MainActivity.this).logoutAsync(email,token).onSuccessTask(new Continuation<String, Task<String>>(){
+                @Override
+                public Task<String> then(Task<String> task) throws Exception {
+
+
+                    return new ApiBase(MainActivity.this).deleteUserdata();
+                }
+
+            }).onSuccess(new Continuation<String, String>(){
+                @Override
+                public String then(Task<String> task) throws Exception {
+
+                    Toast.makeText(MainActivity.this,"ログアウトしました。",Toast.LENGTH_SHORT).show();
+                    //finish();
+                    return null;
+                }
+            }, Task.UI_THREAD_EXECUTOR).continueWith(new Continuation<String, String>() {
+                @Override
+                public String then(Task<String> task) throws Exception {
+                    Log.d("Thread","LoginActLoginContinuewwith"+Thread.currentThread().getName());
+
+                    //finish();
+
+                    if (task.isFaulted()) {
+                        Exception e = task.getError();
+
+                        Log.d("debug2",e.toString());
+                        Log.e("hoge","error", e);
+                        //エラー処理
+
+                        Toast.makeText(MainActivity.this,"ログアウトに失敗しました。",Toast.LENGTH_SHORT).show();
+                    }
+                    return null;
+                }
+            }, Task.UI_THREAD_EXECUTOR);
+
+
+        }
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
+    }
+
+
+    /***** go to fragment
     @Override
     protected void onStart() {
         super.onStart();
@@ -194,33 +254,43 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                                 SettingActivity.class);
                         startActivity(intent);
 
+                    } else if (!Utils.onGoing(getApplicationContext())){
+
+                        Utils.setOnGoing(MainActivity.this, true);
+
                     }
-
-
-
-
 
                 }
             }
         });
 
+    //
+
+    /***** go to fragment
         mRemoveLocationUpdatesButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 mService.removeLocationUpdates();
-                Log.d("debug","ボタンを押したのでService remove");
+
+                Utils.setOnGoing(MainActivity.this, false);
+                //setUIState(Utils.requestingLocationUpdates(MainActivity.this));
+                Utils.deleteThisDest(MainActivity.this);
+
+                Log.d("debug","ボタンを押したのでService remove& 目的地削除");
             }
         });
 
         // Restore the state of the buttons when the activity (re)launches.
-        setUIState(Utils.requestingLocationUpdates(this));
+        setUIState(Utils.requestingLocationUpdates(this),Utils.onGoing(this));
 
         // Bind to the service. If the service is in foreground mode, this signals to the service
         // that since this activity is in the foreground, the service can exit foreground mode.
         bindService(new Intent(this, LocationUpdatesService.class), mServiceConnection,
                 Context.BIND_AUTO_CREATE);
     }
+    */ //
 
+    /***** go to fragment
     @Override
     protected void onResume() {
         super.onResume();
@@ -248,9 +318,12 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         super.onStop();
     }
 
+    */
+
     /**
      * Returns the current state of the permissions needed.
      */
+    /***** go to fragment
     private boolean checkPermissions() {
         return  PackageManager.PERMISSION_GRANTED == ActivityCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION);
@@ -291,9 +364,14 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         }
     }
 
+     */
+
+
     /**
      * Callback received when a permissions request has been completed.
      */
+
+    /***** go to fragment
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
@@ -308,7 +386,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                 mService.requestLocationUpdates();
             } else {
                 // Permission denied.
-                setUIState(false);
+                setUIState(false,false);
                 Snackbar.make(
                         findViewById(R.id.drawer_layout),
                         R.string.permission_location_denied_explanation,
@@ -331,39 +409,112 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
             }
         }
     }
+    */
 
     /**
      * Receiver for broadcasts sent by {@link LocationUpdatesService}.
      */
-    private class MyReceiver extends BroadcastReceiver {
+
+    /***** go to fragment
+    public static class MyReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
             Location location = intent.getParcelableExtra(LocationUpdatesService.EXTRA_LOCATION);
             if (location != null) {
-                Toast.makeText(MainActivity.this, Utils.getLocationText(location),
+                Toast.makeText(context, Utils.getLocationText(location),
                         Toast.LENGTH_SHORT).show();
 
-                mTextView.setText(Utils.getLocationText(location));
+               // mTextView.setText(Utils.getLocationText(location));
             }
         }
     }
+     */
 
+    /***** go to fragment
     @Override
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
+    public void onSharedPreferenceChanged(SharedPreferences sp, String s) {
         // Update the buttons state depending on whether location updates are being requested.
         //memo: locationUpdateのrequestがされたら、Buttonを変更する。
         //memo: ここのFalseはあくまでもDefault値なので、結果では無い。
         if (s.equals(Const.LocationUpDateKEY)) {
-            setUIState(sharedPreferences.getBoolean(Const.LocationUpDateKEY,false));
-            Log.d("debug","Condition:"+sharedPreferences.getBoolean(Const.LocationUpDateKEY,false));
+            setUIState(sp.getBoolean(Const.LocationUpDateKEY,false),sp.getBoolean(Const.OngoingKEY,false));
+            Log.d("debug","1:LocationUpdate,OnGoingCondition:"+sp.getBoolean(Const.OngoingKEY,false)+sp.getBoolean(Const.LocationUpDateKEY,false));
             mTextView.setText("");
         }
-    }
+        if (s.equals(Const.OngoingKEY)) {
+           setUIState(sp.getBoolean(Const.LocationUpDateKEY,false),sp.getBoolean(Const.OngoingKEY,false));
+            Log.d("debug","2:LocationUpdate,OnGoingCondition:"+sp.getBoolean(Const.OngoingKEY,false)+sp.getBoolean(Const.LocationUpDateKEY,false));
 
-    private void setUIState(boolean requestingLocationUpdates) {
+        }
+
+        email = sp.getString(Const.EmailKEY, "");
+        token = sp.getString(Const.TokenKey, "");
+        //memo: 現在設定されている目的地の取得
+
+
+        destname = sp.getString(Const.DestnameKEY, "");
+        destaddress = sp.getString(Const.DestaddressKEY, "");
+        destemail = sp.getString(Const.DestemailKEY, "");
+        latitude = sp.getString(Const.DestLatitudeKEY, "");
+        longitude = sp.getString(Const.DestLongitudeKEY, "");
+
+
+    }
+    */
+
+    /***** go to fragment
+    private void setUIState(boolean requestingLocationUpdates,boolean onGoing) {
+
+
+        if(requestingLocationUpdates) {
+            if (Utils.isEmptyUser(getApplicationContext())) {
+                //ユーザーを登録してください。
+                mRequestLocationUpdatesButton.setEnabled(true);
+                mRequestLocationUpdatesButton.setText("ユーザー登録");
+                mRemoveLocationUpdatesButton.setEnabled(false);
+
+            } else if (Utils.isEmptyDest(getApplicationContext())) {
+
+                //目的地を登録してください。
+                //リセット後はここに戻る。
+                mRequestLocationUpdatesButton.setEnabled(true);
+                mRequestLocationUpdatesButton.setText("目的地登録");
+                mRemoveLocationUpdatesButton.setEnabled(false);
+
+            } else if (!onGoing) {
+
+                //出発！
+                mRequestLocationUpdatesButton.setEnabled(true);
+                mRequestLocationUpdatesButton.setText("出発");
+                mRemoveLocationUpdatesButton.setEnabled(false);
+                //FirstMap()
+                Toast.makeText(this, "目的地をセットしました", Toast.LENGTH_SHORT).show();
+            } else {
+
+                //mail送信
+                //ActiveMap()
+                Toast.makeText(this, "計測開始しました！", Toast.LENGTH_SHORT).show();
+                mRequestLocationUpdatesButton.setEnabled(false);
+                mRequestLocationUpdatesButton.setText("計測中");
+                mRemoveLocationUpdatesButton.setEnabled(true);
+
+
+            }
+
+            //リセットボタン押したあと
+        } else {
+
+            //DefalutMap()
+                mRequestLocationUpdatesButton.setEnabled(true);
+                mRequestLocationUpdatesButton.setText("目的地を設定");
+                mRemoveLocationUpdatesButton.setEnabled(false);
+
+
+        }
+
 
         //memo:Serviceも走って、ユーザーもいて、目的地もある状態。しかし、ユーザーのongoingサインはまだ。
-        if (requestingLocationUpdates && !Utils.isEmptyUser(getApplicationContext()) && !Utils.isEmptyDest(getApplicationContext())&& !Utils.notGoing(getApplicationContext())) {
+        if (requestingLocationUpdates && Utils.onGoing(getApplicationContext())) {
             mRequestLocationUpdatesButton.setEnabled(false);
             mRemoveLocationUpdatesButton.setEnabled(true);
         } else if(Utils.isEmptyUser(getApplicationContext())) {
@@ -378,7 +529,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
             mRequestLocationUpdatesButton.setText("目的地登録");
             mRemoveLocationUpdatesButton.setEnabled(false);
 
-        } else if(Utils.notGoing(getApplicationContext())) {
+        } else if(!Utils.onGoing(getApplicationContext())) {
 
             mRequestLocationUpdatesButton.setEnabled(true);
             mRequestLocationUpdatesButton.setText("計測スタート");
@@ -389,8 +540,9 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
             mRequestLocationUpdatesButton.setEnabled(true);
             mRemoveLocationUpdatesButton.setEnabled(false);
         }
-    }
 
+    }
+    */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.

@@ -307,10 +307,54 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
     public void userLogin(String email,String password){
 
+        /*
        String mEmail,mPassword;
        mEmail = email;
        mPassword = password;
+       */
 
+        new ApiBase(LoginActivity.this).loginAsync(email,password).onSuccessTask(new Continuation<String, Task<String>>() {
+            @Override
+            public Task<String> then(Task<String> task) throws Exception {
+
+                return new ApiBase(LoginActivity.this).saveUserdata(task.getResult());
+            }
+        }).onSuccess(new Continuation<String, String>() {
+            @Override
+            public String then(Task<String> task) throws Exception {
+
+                // mProgress.dismiss();
+                Log.d("hoge", "hoge");
+
+                Log.d("Thread", "LoginActLoginOnSuccess" + Thread.currentThread().getName());
+                Toast.makeText(LoginActivity.this,"ログインしました",Toast.LENGTH_SHORT).show();
+
+                finish();
+
+                return null;
+            }
+        }, Task.UI_THREAD_EXECUTOR).continueWith(new Continuation<String, String>() {
+            @Override
+            public String then(Task<String> task) throws Exception {
+                Log.d("Thread","LoginActLoginContinuewwith"+Thread.currentThread().getName());
+
+                //finish();
+
+                if (task.isFaulted()) {
+                    Exception e = task.getError();
+
+                    Log.d("debug2",e.toString());
+                    Log.e("hoge","error", e);
+                    //エラー処理
+
+                    Toast.makeText(LoginActivity.this,"ログインに失敗しました。",Toast.LENGTH_SHORT).show();
+                }
+                return null;
+            }
+        }, Task.UI_THREAD_EXECUTOR);
+
+
+        /*
      new ApiBase(LoginActivity.this).createAccountAsync(null,mEmail,mPassword).onSuccessTask(new Continuation<String, Task<String>>(){
             @Override
             public Task<String> then(Task<String> task) throws Exception {
@@ -337,6 +381,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             }
         }, Task.UI_THREAD_EXECUTOR);
                     Log.d("Thread","LoginActCreate"+Thread.currentThread().getName());
+
+        */
     }
 }
 

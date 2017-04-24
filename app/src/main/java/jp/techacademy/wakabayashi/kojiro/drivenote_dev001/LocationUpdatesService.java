@@ -48,9 +48,9 @@ public class LocationUpdatesService extends Service implements GoogleApiClient.C
 
     private static final String TAG = LocationUpdatesService.class.getSimpleName();
 
-    static final String ACTION_BROADCAST = PACKAGE_NAME + ".broadcast";
+    public static final String ACTION_BROADCAST = PACKAGE_NAME + ".broadcast";
 
-    static final String EXTRA_LOCATION = PACKAGE_NAME + ".location";
+    public static final String EXTRA_LOCATION = PACKAGE_NAME + ".location";
     private static final String EXTRA_STARTED_FROM_NOTIFICATION = PACKAGE_NAME +
             ".started_from_notification";
 
@@ -310,7 +310,7 @@ public class LocationUpdatesService extends Service implements GoogleApiClient.C
      * clients, we don't need to deal with IPC.
      */
     public class LocalBinder extends Binder {
-        LocationUpdatesService getService() {
+        public LocationUpdatesService getService() {
             return LocationUpdatesService.this;
         }
     }
