@@ -353,9 +353,13 @@ public class SettingActivity extends AppCompatActivity implements SharedPreferen
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        Log.d("debug","SettingActivity: PreferenceChanged");
+
+       Log.d("debug","isEmptyDest"+Utils.isEmptyDest(this));
+       Log.d("debug","latitude"+sharedPreferences.getString(Const.DestLatitudeKEY, ""));
 
 
-;
+
     }
 
     @Override
@@ -428,7 +432,7 @@ public class SettingActivity extends AppCompatActivity implements SharedPreferen
 
         //memo: 目的地を追加する際にすでにある目的地を消し、その後に追加する。
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
-        //sp.registerOnSharedPreferenceChangeListener(this);
+        sp.registerOnSharedPreferenceChangeListener(this);
         sp.edit().remove("id").remove("position_id").remove("destname").remove("destaddress").remove("destemail").remove("latitude").remove("longitude").apply();
 
         SharedPreferences.Editor editor = sp.edit();
@@ -449,7 +453,7 @@ public class SettingActivity extends AppCompatActivity implements SharedPreferen
         Intent resultintent = new Intent();
         resultintent.putExtra("Result","OK");
         setResult(RESULT_OK,resultintent);
-        finish();
+        //finish();
 
     }
 }

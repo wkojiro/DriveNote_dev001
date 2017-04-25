@@ -151,6 +151,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         FragmentManager fm = getFragmentManager();
         // fm.beginTransaction().replace(R.id.content_frame, new MainFragment()).commit();
         fm.beginTransaction().replace(R.id.content_frame, new GmapFragment()).commit();
+        Log.d("Activity","onCreate");
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
@@ -165,7 +166,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (id == R.id.nav_hobby) {
             // Handle the camera action
             // fm.beginTransaction().replace(R.id, new ImportFragment()).commit();
-            fm.beginTransaction().replace(R.id.content_frame, new MapFragment()).commit();
         } else if (id == R.id.nav_life) {
 
 

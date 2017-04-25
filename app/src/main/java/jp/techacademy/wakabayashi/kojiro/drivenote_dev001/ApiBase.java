@@ -165,6 +165,7 @@ public class ApiBase implements SharedPreferences.OnSharedPreferenceChangeListen
 
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         sp.registerOnSharedPreferenceChangeListener(this);
+
         SharedPreferences.Editor editor = sp.edit();
         editor.putString(Const.UidKEY , user_id);
         editor.putString(Const.EmailKEY, user_email);
@@ -175,7 +176,7 @@ public class ApiBase implements SharedPreferences.OnSharedPreferenceChangeListen
         taskresult.setResult("OK");
         //return taskresult.getTask();
 
-        Log.d("debug", "doSaveUserInfo success");
+        Log.d("debug", "Login/Create:SaveUserInfo success");
         return taskresult.getTask();
     }
 
@@ -243,7 +244,7 @@ public class ApiBase implements SharedPreferences.OnSharedPreferenceChangeListen
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         sp.edit().remove("username").remove("email").remove("access_token").remove("id").remove("position_id").remove("destname").remove("destaddress").remove("destemail").remove("latitude").remove("longitude").apply();
         //sp.edit().clear().commit();
-        Log.d("Delete","done");
+        Log.d("debug","Logout:deleteUserdata_done");
 
 
         mRealm.beginTransaction();

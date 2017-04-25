@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 import java.text.DateFormat;
 import java.util.Date;
@@ -44,20 +45,23 @@ public class Utils {
     //memo: 外部からアクセスできるようにPublicにしていたらダメだった。staticにしたらできた
     public static boolean isEmptyUser(Context context) {
 
-        return (PreferenceManager.getDefaultSharedPreferences(context).getString(Const.EmailKEY, "").equals("")
-                && PreferenceManager.getDefaultSharedPreferences(context).getString(Const.TokenKey, "").equals(""));
+        return PreferenceManager.getDefaultSharedPreferences(context).getString(Const.EmailKEY, "").equals("")
+                && PreferenceManager.getDefaultSharedPreferences(context).getString(Const.TokenKey, "").equals("");
 
     }
 
     public static boolean isEmptyDest(Context context){
 
-
-        return(PreferenceManager.getDefaultSharedPreferences(context).getString(Const.DestnameKEY, "").equals("")
+        Log.d("debug_Utils","isEmptyDest"+PreferenceManager.getDefaultSharedPreferences(context).getString(Const.DestnameKEY, ""));
+        Log.d("debug_Utils","isEmptyDest"+PreferenceManager.getDefaultSharedPreferences(context).getString(Const.DestaddressKEY, ""));
+        Log.d("debug_Utils","isEmptyDest"+PreferenceManager.getDefaultSharedPreferences(context).getString(Const.DestemailKEY, ""));
+        Log.d("debug_Utils","isEmptyDest"+PreferenceManager.getDefaultSharedPreferences(context).getString(Const.DestLatitudeKEY, ""));
+        Log.d("debug_Utils","isEmptyDest"+PreferenceManager.getDefaultSharedPreferences(context).getString(Const.DestLongitudeKEY, ""));
+        return PreferenceManager.getDefaultSharedPreferences(context).getString(Const.DestnameKEY, "").equals("")
                 && PreferenceManager.getDefaultSharedPreferences(context).getString(Const.DestaddressKEY, "").equals("")
                 && PreferenceManager.getDefaultSharedPreferences(context).getString(Const.DestemailKEY, "").equals("")
                 && PreferenceManager.getDefaultSharedPreferences(context).getString(Const.DestLatitudeKEY, "").equals("")
-                && PreferenceManager.getDefaultSharedPreferences(context).getString(Const.DestLongitudeKEY, "").equals(""));
-
+                && PreferenceManager.getDefaultSharedPreferences(context).getString(Const.DestLongitudeKEY, "").equals("");
 
     }
 
