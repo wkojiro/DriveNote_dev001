@@ -78,9 +78,9 @@ public class DestAdapter extends BaseAdapter {
 
         //memo: 現状はPositionKeyを保存しているから、これで条件分岐しているが本来はRailsIdで検索すべき。
         //memo: もし、すでに保存されている目的地があるのであれば、該当する目的地にチェックをつける
-        if(sp.getString(Const.DestnameKEY,"") != "" ){
+        if(sp.getString(Utils.DestnameKEY,"") != "" ){
 
-            rails_id = sp.getInt(Const.RailsKEY,-1);
+            rails_id = sp.getInt(Utils.RailsKEY,-1);
 
             // rails_id が含まれるmDestArrayListの案件を検索する。
             // その案件のpositionを確認する。

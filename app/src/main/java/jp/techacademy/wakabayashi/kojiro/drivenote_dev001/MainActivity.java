@@ -1,6 +1,8 @@
 package jp.techacademy.wakabayashi.kojiro.drivenote_dev001;
 
+import android.app.AlarmManager;
 import android.app.FragmentManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -42,6 +44,8 @@ import android.widget.Toast;
 
 import com.google.android.gms.maps.MapFragment;
 
+import java.util.Calendar;
+
 import bolts.Continuation;
 import bolts.Task;
 import jp.techacademy.wakabayashi.kojiro.drivenote_dev001.fragments.GmapFragment;
@@ -52,6 +56,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     // Used in checking for runtime permissions.
     private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 34;
+
+    //alarm Setting for unconnected situation
+    private static final int bid1 = 1;
 
     // The BroadcastReceiver used to listen from broadcasts from the service.
    // private MyReceiver myReceiver;
@@ -226,6 +233,39 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    private void pendingUpdates() {
+
+        // 時間をセットする
+        Calendar calendar = Calendar.getInstance();
+        // Calendarを使って現在の時間をミリ秒で取得
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        // 5秒後に設定
+        calendar.add(Calendar.SECOND, 1000); //1000秒（１６分４０秒）
+
+        Intent intent = new Intent(getApplicationContext(), LocationUpdatesService.class);
+        PendingIntent pending = PendingIntent.getService(getApplicationContext(), bid1, intent, 0);
+
+        // アラームをセットする
+        AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
+        //am.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pending);
+        am.setInexactRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), 100000, pending); //100000(1.67分）
+        Log.d("debug", "pendingUpdatesがセットされました");
+//１０秒毎
+
+
+    }
+
+    private void removependingUpdates() {
+
+        Intent intent = new Intent(getApplicationContext(), LocationUpdatesService.class);
+        PendingIntent pending = PendingIntent.getService(getApplicationContext(), bid1, intent, 0);
+        // アラームを解除する
+        AlarmManager am = (AlarmManager) MainActivity.this.getSystemService(ALARM_SERVICE);
+        am.cancel(pending);
+        Log.d("debug", "pendingUpdatesはremoveされました");
+
     }
 
 

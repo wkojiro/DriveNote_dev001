@@ -112,7 +112,7 @@ public class LocationUpdatesService extends Service implements GoogleApiClient.C
     //memo: preferenceから現在登録されているユーザーを受け取る為の変数
     String username;
     String email;
-    String access_token;
+    String token;
 
 
     //memo: preferenceから現在登録されている目的地を受け取る為の変数
@@ -279,6 +279,11 @@ public class LocationUpdatesService extends Service implements GoogleApiClient.C
                 PendingIntent.FLAG_UPDATE_CURRENT);
 
         // The PendingIntent to launch activity.
+        //memo: ここでActivityに戻れるが、振り出しに戻ってしまう。（対策として下記を実装）
+        Intent MainIntent = new Intent(this,MainActivity.class);
+        MainIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+
+        // The PendingIntent to launch activity.
         PendingIntent activityPendingIntent = PendingIntent.getActivity(this, 0,
                 new Intent(this, MainActivity.class), 0);
 
@@ -388,8 +393,10 @@ public class LocationUpdatesService extends Service implements GoogleApiClient.C
         return false;
     }
 
+
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sp, String key) {
+    /*
         Log.d("service","onSharedPreferenceChanged");
         username = sp.getString(Const.UnameKEY, "");
         email = sp.getString(Const.EmailKEY, "");
@@ -424,9 +431,10 @@ public class LocationUpdatesService extends Service implements GoogleApiClient.C
                 Log.d("debug", "onSharedPreferenceChangedListnerでoriginaldistanceが保存された");
             }
         }
-        */
 
+    */
     }
+
 
     //memo:　目的地と現在位置の距離を取る（onLocationChangedが呼ばれるたびに計算する）
     private Double getDistance(Location location){
@@ -435,12 +443,12 @@ public class LocationUpdatesService extends Service implements GoogleApiClient.C
         currentlongitude = location.getLongitude();
 
 
-        email = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getString(Const.EmailKEY,"");
-        access_token = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getString(Const.TokenKey,"");
-        destlatitude = Double.parseDouble(PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getString(Const.DestLatitudeKEY, ""));
-        destlongitude = Double.parseDouble(PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getString(Const.DestLongitudeKEY, ""));
-        destname = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getString(Const.DestnameKEY,"");
-        destemail = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getString(Const.DestemailKEY,"");
+        email = Utils.getLoggedInUserEmail(getApplicationContext());
+        token = Utils.getLoggedInUserToken(getApplicationContext());
+        destlatitude = Double.parseDouble(Utils.getDestLatitude(getApplicationContext()));
+        destlongitude = Double.parseDouble(Utils.getDestLongitude(getApplicationContext()));
+        destname = Utils.getDestName(getApplicationContext());
+        destemail = Utils.getDestEmail(getApplicationContext());
 
 
         latlng = new LatLng(destlatitude, destlongitude);
@@ -477,8 +485,8 @@ public class LocationUpdatesService extends Service implements GoogleApiClient.C
         Log.d("debug","answer"+ans);
 
 
-        destlatitude = Double.parseDouble(PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getString(Const.DestLatitudeKEY, ""));
-        destlongitude = Double.parseDouble(PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getString(Const.DestLongitudeKEY, ""));
+        destlatitude = Double.parseDouble(Utils.getDestLatitude(getApplicationContext()));
+        destlongitude = Double.parseDouble(Utils.getDestLongitude(getApplicationContext()));
 
      //   if (nowdistance - referencedistance <= 0 && mailCount == 0) {
 
@@ -493,7 +501,7 @@ public class LocationUpdatesService extends Service implements GoogleApiClient.C
                     .onSuccess(new Continuation<String, String>() {
                         @Override
                         public String then(Task<String> task) throws Exception {
-                            Toast.makeText(null, "メール送信しました。", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getApplicationContext(), "メール送信しました。", Toast.LENGTH_SHORT).show();
                             return null;
                         }
                     }, Task.UI_THREAD_EXECUTOR).continueWith(new Continuation<String, String>() {
@@ -502,7 +510,7 @@ public class LocationUpdatesService extends Service implements GoogleApiClient.C
                     Log.d("Thread", "LoginActLoginContinuewwith" + Thread.currentThread().getName());
 
                     if (task.isFaulted()) {
-                        Toast.makeText(null, "メール送信に失敗しました。", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "メール送信に失敗しました。", Toast.LENGTH_SHORT).show();
                         Log.d("debug", "70%メール送信していません。");
                     }
                     return null;

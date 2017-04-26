@@ -105,9 +105,9 @@ public class SettingActivity extends AppCompatActivity implements SharedPreferen
         sp.registerOnSharedPreferenceChangeListener(this);
 
         //memo: API用に取得しておく
-        apiusername = sp.getString(Const.UnameKEY, "");
-        apiemail = sp.getString(Const.EmailKEY, "");
-        apitoken = sp.getString(Const.TokenKey, "");
+        apiusername = sp.getString(Utils.UnameKEY, "");
+        apiemail = sp.getString(Utils.EmailKEY, "");
+        apitoken = sp.getString(Utils.TokenKey, "");
 
         //memo: Fixed features
 

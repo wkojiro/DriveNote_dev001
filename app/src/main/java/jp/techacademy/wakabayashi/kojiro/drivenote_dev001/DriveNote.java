@@ -24,11 +24,13 @@ public class DriveNote extends Application {
         sInstance = this;
     }
 
+    /*
 
     public static synchronized DriveNote getInstance() {
         return sInstance;
     }
 
+*/
     @Override
     public void onTerminate() {
         super.onTerminate();

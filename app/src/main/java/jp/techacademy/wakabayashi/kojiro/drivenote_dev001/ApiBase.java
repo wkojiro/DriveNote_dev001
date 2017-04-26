@@ -534,12 +534,12 @@ public class ApiBase {
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 String s = "OK";
-                //Log.d("debug","responce"+response);
+                Log.d("debug","response1"+response);
                 if (response.isSuccessful()){
                     taskresult.setResult(s);
                 }else{
                     taskresult.setError(new HttpException(response.code(),response.body().string()));
-                    Log.d("debug","responce"+response);
+                    Log.d("debug","response2"+response);
                 }
             }
         });

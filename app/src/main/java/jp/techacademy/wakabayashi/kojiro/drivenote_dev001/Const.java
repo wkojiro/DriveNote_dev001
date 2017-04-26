@@ -5,7 +5,7 @@ package jp.techacademy.wakabayashi.kojiro.drivenote_dev001;
  */
 
 public class Const {
-
+/*
     public static final String LocationUpDateKEY = "locaction_updates";
     public static final String UidKEY = "id";
     public static final String UnameKEY = "username"; //Preferenceにusernameを保存する時のキー
@@ -21,5 +21,5 @@ public class Const {
     public static final String ODISTANCEKEY = "originaldistance";
     public static final String OngoingKEY = "ongoing";
 
-
+*/
 }

@@ -170,18 +170,18 @@ public class Utils {
 
     //memo:　ユーザー存在確認
     public static boolean isEmptyUser(Context context) {
-        return PreferenceManager.getDefaultSharedPreferences(context).getString(Const.EmailKEY, "").equals("")
-                && PreferenceManager.getDefaultSharedPreferences(context).getString(Const.TokenKey, "").equals("");
+        return PreferenceManager.getDefaultSharedPreferences(context).getString(EmailKEY, "").equals("")
+                && PreferenceManager.getDefaultSharedPreferences(context).getString(TokenKey, "").equals("");
     }
 
     //memo:　目的地の存在確認
     public static boolean isEmptyDest(Context context){
 
-        return PreferenceManager.getDefaultSharedPreferences(context).getString(Const.DestnameKEY, "").equals("")
-                && PreferenceManager.getDefaultSharedPreferences(context).getString(Const.DestaddressKEY, "").equals("")
-                && PreferenceManager.getDefaultSharedPreferences(context).getString(Const.DestemailKEY, "").equals("")
-                && PreferenceManager.getDefaultSharedPreferences(context).getString(Const.DestLatitudeKEY, "").equals("")
-                && PreferenceManager.getDefaultSharedPreferences(context).getString(Const.DestLongitudeKEY, "").equals("");
+        return PreferenceManager.getDefaultSharedPreferences(context).getString(DestnameKEY, "").equals("")
+                && PreferenceManager.getDefaultSharedPreferences(context).getString(DestaddressKEY, "").equals("")
+                && PreferenceManager.getDefaultSharedPreferences(context).getString(DestemailKEY, "").equals("")
+                && PreferenceManager.getDefaultSharedPreferences(context).getString(DestLatitudeKEY, "").equals("")
+                && PreferenceManager.getDefaultSharedPreferences(context).getString(DestLongitudeKEY, "").equals("");
 
     }
 
@@ -189,12 +189,12 @@ public class Utils {
     public static void setOnGoing(Context context, boolean onGoing) {
         PreferenceManager.getDefaultSharedPreferences(context)
                 .edit()
-                .putBoolean(Const.OngoingKEY, onGoing)
+                .putBoolean(OngoingKEY, onGoing)
                 .apply();
     }
 
     public static boolean onGoing(Context context){
-        return PreferenceManager.getDefaultSharedPreferences(context).getBoolean(Const.OngoingKEY,false);
+        return PreferenceManager.getDefaultSharedPreferences(context).getBoolean(OngoingKEY,false);
     }
 
 
@@ -245,7 +245,6 @@ public class Utils {
         return context.getString(R.string.location_updated,
                 DateFormat.getDateTimeInstance().format(new Date()));
     }
-
 
     static void resetApp() {
 
