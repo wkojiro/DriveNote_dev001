@@ -47,7 +47,7 @@ import bolts.Task;
 import jp.techacademy.wakabayashi.kojiro.drivenote_dev001.fragments.GmapFragment;
 
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener,SharedPreferences.OnSharedPreferenceChangeListener {
     private static final String TAG = MainActivity.class.getSimpleName();
 
     // Used in checking for runtime permissions.
@@ -71,7 +71,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private int mGenre = 0;
 
     // Preference elements
-
+    SharedPreferences sp;
     private String email,token,destname,destemail,destaddress,latitude,longitude;
 
     // Monitors the state of the connection to the service.
@@ -121,6 +121,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
         */
 
+        //memo: Login時に保存したユーザーデータを取得
+        sp = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        sp.registerOnSharedPreferenceChangeListener(this);
 
 
         // ナビゲーションドロワーの設定
@@ -178,7 +181,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         } else if (id == R.id.logout){
 
-            new ApiBase(MainActivity.this).logoutAsync(email,token).onSuccessTask(new Continuation<String, Task<String>>(){
+            new ApiBase(MainActivity.this).logoutAsync().onSuccessTask(new Continuation<String, Task<String>>(){
                 @Override
                 public Task<String> then(Task<String> task) throws Exception {
 
@@ -224,6 +227,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
+
 
 
     /***** go to fragment
@@ -432,37 +436,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
      */
 
-    /***** go to fragment
+
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sp, String s) {
-        // Update the buttons state depending on whether location updates are being requested.
-        //memo: locationUpdateのrequestがされたら、Buttonを変更する。
-        //memo: ここのFalseはあくまでもDefault値なので、結果では無い。
-        if (s.equals(Const.LocationUpDateKEY)) {
-            setUIState(sp.getBoolean(Const.LocationUpDateKEY,false),sp.getBoolean(Const.OngoingKEY,false));
-            Log.d("debug","1:LocationUpdate,OnGoingCondition:"+sp.getBoolean(Const.OngoingKEY,false)+sp.getBoolean(Const.LocationUpDateKEY,false));
-            mTextView.setText("");
-        }
-        if (s.equals(Const.OngoingKEY)) {
-           setUIState(sp.getBoolean(Const.LocationUpDateKEY,false),sp.getBoolean(Const.OngoingKEY,false));
-            Log.d("debug","2:LocationUpdate,OnGoingCondition:"+sp.getBoolean(Const.OngoingKEY,false)+sp.getBoolean(Const.LocationUpDateKEY,false));
+        Log.d("debug","MainActivity: PreferenceChanged");
 
-        }
-
-        email = sp.getString(Const.EmailKEY, "");
-        token = sp.getString(Const.TokenKey, "");
-        //memo: 現在設定されている目的地の取得
-
-
-        destname = sp.getString(Const.DestnameKEY, "");
-        destaddress = sp.getString(Const.DestaddressKEY, "");
-        destemail = sp.getString(Const.DestemailKEY, "");
-        latitude = sp.getString(Const.DestLatitudeKEY, "");
-        longitude = sp.getString(Const.DestLongitudeKEY, "");
 
 
     }
-    */
+
 
     /***** go to fragment
     private void setUIState(boolean requestingLocationUpdates,boolean onGoing) {

@@ -333,8 +333,10 @@ public class LocationUpdatesService extends Service implements GoogleApiClient.C
             Double distance = getDistance(location);
             Log.d("debug","呼ばれるたびにgetDistance");
             //memo: 目的地がないと落ちそう。この設定だと目的地があれば何度もメールを送ることになる。取り合えずこのままにしておく。
-            postMyPosition(distance);
 
+            if(Utils.onGoing(getApplicationContext())){
+                postMyPosition(distance);
+            }
             intent.putExtra(EXTRA_DESTANCE, distance);
         }
         intent.putExtra(EXTRA_LOCATION, location);
@@ -487,7 +489,7 @@ public class LocationUpdatesService extends Service implements GoogleApiClient.C
             String nowlatitude = String.valueOf(currentlatitude);
             String nowlongitude = String.valueOf(currentlongitude);
 
-            new ApiBase(getApplicationContext()).postMailAsync(email, access_token, destname, destemail, nowlatitude, nowlongitude)
+            new ApiBase(getApplicationContext()).postMailAsync(nowlatitude, nowlongitude)
                     .onSuccess(new Continuation<String, String>() {
                         @Override
                         public String then(Task<String> task) throws Exception {

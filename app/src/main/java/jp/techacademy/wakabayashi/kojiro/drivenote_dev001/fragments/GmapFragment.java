@@ -22,6 +22,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -66,7 +67,6 @@ import jp.techacademy.wakabayashi.kojiro.drivenote_dev001.Utils;
 public class GmapFragment extends Fragment implements SharedPreferences.OnSharedPreferenceChangeListener, OnMapReadyCallback {
     private static final String TAG = GmapFragment.class.getSimpleName();
 
-
     // Used in checking for runtime permissions.
     private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 134;
 
@@ -84,13 +84,10 @@ public class GmapFragment extends Fragment implements SharedPreferences.OnShared
     // UI elements.
     private Button mRequestLocationUpdatesButton;
     private Button mRemoveLocationUpdatesButton;
-    // private TextView mTextView;
-    String email, token, destname, destemail, destaddress, latitude, longitude;
 
+    String destname;
     Double destlatitude, destlongitude;
 
-    Double currentlatitude;
-    Double currentlongitude;
     private LatLng latlng;
 
     private static TextView mTextView;
@@ -104,8 +101,6 @@ public class GmapFragment extends Fragment implements SharedPreferences.OnShared
     MarkerOptions destMarkerOptions = new MarkerOptions();
     protected LatLng destlatlng;
 
-
-
     Polyline polylineFinal;
     PolylineOptions options;
 
@@ -113,14 +108,11 @@ public class GmapFragment extends Fragment implements SharedPreferences.OnShared
     private Float nowdistance;
     private double referencedistance;
 
-
-
     //memo: set value(スコープを要注意）
     Integer mailCount = 0;
-    Integer mStatus = 0;
 
-
-
+    // Preference elements
+    SharedPreferences sp;
 
     // Monitors the state of the connection to the service.
     private final ServiceConnection mServiceConnection = new ServiceConnection() {
@@ -156,6 +148,10 @@ public class GmapFragment extends Fragment implements SharedPreferences.OnShared
         super.onCreate(savedInstanceState);
         myReceiver = new MyReceiver();
 
+        sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        sp.registerOnSharedPreferenceChangeListener(this);
+
+
         resetState();
 
         mTextView = (TextView) getActivity().findViewById(R.id.textView);
@@ -166,7 +162,6 @@ public class GmapFragment extends Fragment implements SharedPreferences.OnShared
                 requestPermissions();
             }
         }
-        Log.d("where is dest","onCreate"+PreferenceManager.getDefaultSharedPreferences(getActivity()).getString(Const.DestnameKEY, ""));
     }
 
     public class MyReceiver extends BroadcastReceiver {
@@ -174,7 +169,7 @@ public class GmapFragment extends Fragment implements SharedPreferences.OnShared
         public void onReceive(Context context, Intent intent) {
             Location location = intent.getParcelableExtra(LocationUpdatesService.EXTRA_LOCATION);
             if (location != null) {
-                Log.d("where is dest","MyReciever"+PreferenceManager.getDefaultSharedPreferences(getActivity()).getString(Const.DestnameKEY, ""));
+
                 mCurrentLocation = location;
                 mapState();
                 Toast.makeText(context, Utils.getLocationText(mCurrentLocation), Toast.LENGTH_SHORT).show();
@@ -184,9 +179,12 @@ public class GmapFragment extends Fragment implements SharedPreferences.OnShared
     }
 
     private void mapState(){
-        if(mCurrentLocation != null && !Utils.isEmptyDest(getActivity()) && !Utils.onGoing(getActivity())) {
+
+        if (mCurrentLocation == null){
+            defaultMap();
+        } else if(!Utils.isEmptyDest(getActivity()) && !Utils.onGoing(getActivity())) {
             firstMap();
-        } else if(mCurrentLocation != null && !Utils.isEmptyDest(getActivity()) && Utils.onGoing(getActivity())) {
+        } else if(Utils.onGoing(getActivity())) {
             activeMap();
         } else {
             defaultMap();
@@ -218,58 +216,66 @@ public class GmapFragment extends Fragment implements SharedPreferences.OnShared
         super.onStart();
         Toast.makeText(getActivity(), "OnStart", Toast.LENGTH_SHORT).show();
 
-        Log.d("debug","getActivitiy"+getActivity());
-        Log.d("debug","getActivitiy.getApplication()"+getActivity().getApplication());
-
-
-        //memo: **** check this point ***
-        //PreferenceManager.getDefaultSharedPreferences(getActivity()).registerOnSharedPreferenceChangeListener(this);
-
-        //memo: 目的地を取得する
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        sp.registerOnSharedPreferenceChangeListener(this);
-
         mRequestLocationUpdatesButton = (Button) getActivity().findViewById(R.id.request_location_updates_button);
         mRemoveLocationUpdatesButton = (Button) getActivity().findViewById(R.id.remove_location_updates_button);
 
         mRequestLocationUpdatesButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (!checkPermissions()) {
-                    requestPermissions();
+                if(Utils.isEmptyUser(getActivity())){
+                    Intent intent = new Intent(getActivity(), LoginActivity.class);
+                    startActivity(intent);
                 } else {
-                    mService.requestLocationUpdates();
-                    Log.d("debug", "ボタンを押したのでService request");
-                    if (Utils.isEmptyUser(getActivity())) {
-                        Intent intent = new Intent(getActivity(), LoginActivity.class);
-                        startActivity(intent);
-                    } else if (Utils.isEmptyDest(getActivity())) {
-                        Intent intent = new Intent(getActivity(), SettingActivity.class);
-                        startActivity(intent);
-                    } else if (!Utils.onGoing(getActivity())) {
-                        Utils.setOnGoing(getActivity(), true);
-                        new ApiBase(getActivity()).postMailAsync(email, token, destname, destemail, String.valueOf(mCurrentLocation.getLatitude()), String.valueOf(mCurrentLocation.getLongitude()))
-                                .onSuccess(new Continuation<String, String>() {
+                    if (!checkPermissions()) {
+                        requestPermissions();
+                    } else {
+                        mService.requestLocationUpdates();
+
+                        if (Utils.isEmptyDest(getActivity())) {
+                            Intent intent = new Intent(getActivity(), SettingActivity.class);
+                            startActivity(intent);
+
+                            //ここでFirstMapが呼ばれる（PermissionOK, UserOK, APIOK, DestOK, onGoingNG)
+
+                        } else if (!Utils.onGoing(getActivity())) {
+
+                            if(mCurrentLocation == null){
+                                new AlertDialog.Builder(getActivity())
+                                        .setTitle("お知らせ")
+                                        .setMessage("通信状況を確認してください。")
+                                        .setPositiveButton("OK", null)
+                                        .show();
+
+
+                            } else {
+
+                                Utils.setOnGoing(getActivity(), true);
+                                setUIState(Utils.requestingLocationUpdates(getActivity()), Utils.onGoing(getActivity()));
+                                new ApiBase(getActivity()).postMailAsync(String.valueOf(mCurrentLocation.getLatitude()), String.valueOf(mCurrentLocation.getLongitude()))
+                                        .onSuccess(new Continuation<String, String>() {
+                                            @Override
+                                            public String then(Task<String> task) throws Exception {
+                                                Toast.makeText(null, "メール送信しました。", Toast.LENGTH_SHORT).show();
+                                                return null;
+                                            }
+                                        }, Task.UI_THREAD_EXECUTOR).continueWith(new Continuation<String, String>() {
                                     @Override
                                     public String then(Task<String> task) throws Exception {
-                                        Toast.makeText(null, "メール送信しました。", Toast.LENGTH_SHORT).show();
+                                        if (task.isFaulted()) {
+                                            Toast.makeText(getActivity(), "メール送信に失敗しました。", Toast.LENGTH_SHORT).show();
+                                        }
                                         return null;
                                     }
-                                }, Task.UI_THREAD_EXECUTOR).continueWith(new Continuation<String, String>() {
-                            @Override
-                            public String then(Task<String> task) throws Exception {
-                                if (task.isFaulted()) {
-                                    Toast.makeText(getActivity(), "メール送信に失敗しました。", Toast.LENGTH_SHORT).show();
+                                }, Task.UI_THREAD_EXECUTOR);
+                                if (originaldistance != null) {
+                                    Utils.removeOriginalDistance(getActivity());
+                                    Utils.setOriginalDistance(getActivity(), String.valueOf(originaldistance));
                                 }
-                                return null;
                             }
-                        }, Task.UI_THREAD_EXECUTOR);
-                        if (originaldistance != null) {
-                            Utils.removeOriginalDistance(getActivity());
-                            Utils.setOriginalDistance(getActivity(),String.valueOf(originaldistance));
-                            // Utils.setOriginalDistance(getActivity(),originaldistance);
-                           // saveOriginaldistancedata(originaldistance);
+
+
                         }
+
                     }
                 }
             }
@@ -279,25 +285,17 @@ public class GmapFragment extends Fragment implements SharedPreferences.OnShared
             @Override
             public void onClick(View view) {
 
-        //        resetState();
-
                 // 1.Serviceをとめる（＝APIを止める）
                 mService.removeLocationUpdates();
-
                 // 2.onGoingをとめる
                 Utils.setOnGoing(getActivity(), false);
                 //setUIState(Utils.requestingLocationUpdates(MainActivity.this));
-
                 // 3.目的地を削除する
                 Utils.removeThisDest(getActivity());
-
                 // 4.地図を戻す
                 defaultMap();
-
                 // 5.Buttonを戻す
                 setUIState(Utils.requestingLocationUpdates(getActivity()), Utils.onGoing(getActivity()));
-
-
             }
         });
         // Restore the state of the buttons when the activity (re)launches.
@@ -307,7 +305,6 @@ public class GmapFragment extends Fragment implements SharedPreferences.OnShared
         // that since this activity is in the foreground, the service can exit foreground mode.
         getActivity().bindService(new Intent(getActivity(), LocationUpdatesService.class), mServiceConnection, Context.BIND_AUTO_CREATE);
 
-        Log.d("where is dest","onStart"+PreferenceManager.getDefaultSharedPreferences(getActivity()).getString(Const.DestnameKEY, ""));
     }
 
     @Override
@@ -315,7 +312,6 @@ public class GmapFragment extends Fragment implements SharedPreferences.OnShared
         super.onResume();
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(myReceiver,
                 new IntentFilter(LocationUpdatesService.ACTION_BROADCAST));
-
         Log.d("debug","onResume");
     }
 
@@ -335,11 +331,10 @@ public class GmapFragment extends Fragment implements SharedPreferences.OnShared
             getActivity().unbindService(mServiceConnection);
             mBound = false;
         }
-        PreferenceManager.getDefaultSharedPreferences(getActivity())
-                .unregisterOnSharedPreferenceChangeListener(this);
+        //sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        //sp.unregisterOnSharedPreferenceChangeListener(this);
         super.onStop();
         Log.d("debug","onStop");
-
     }
 
     @Override
@@ -347,59 +342,72 @@ public class GmapFragment extends Fragment implements SharedPreferences.OnShared
         // Update the buttons state depending on whether location updates are being requested.
         //memo: locationUpdateのrequestがされたら、Buttonを変更する。
         //memo: ここのFalseはあくまでもDefault値なので、結果では無い。
-        Log.d("fragment","preference");
 
-        Log.d("debug", "onSharedPreferences:" + s);
-        //  Log.d("debug","PreferenceLocUp:"+Const.LocationUpDateKEY);
-        //  Log.d("debug","PreferenceOnGoing:"+Const.LocationUpDateKEY);
+        Log.d("debug","MapFragment: PreferenceChanged");
 
 
-        if (s.equals(Const.LocationUpDateKEY)) {
-            setUIState(sp.getBoolean(Const.LocationUpDateKEY, false), sp.getBoolean(Const.OngoingKEY, false));
-            Log.d("debug", "1:LocationUpdate,OnGoingCondition:" + sp.getBoolean(Const.OngoingKEY, false) + sp.getBoolean(Const.LocationUpDateKEY, false));
+        if (s.equals(Utils.LocationUpDateKEY)) {
+           // setUIState(sp.getBoolean(Const.LocationUpDateKEY, false), sp.getBoolean(Const.OngoingKEY, false));
+            Log.d("debug", "1:LocationUpdate,OnGoingCondition:" + sp.getBoolean(Utils.OngoingKEY, false) + sp.getBoolean(Utils.LocationUpDateKEY, false));
 
         }
-        if (s.equals(Const.OngoingKEY)) {
-            setUIState(sp.getBoolean(Const.LocationUpDateKEY, false), sp.getBoolean(Const.OngoingKEY, false));
-            Log.d("debug", "2:LocationUpdate,OnGoingCondition:" + sp.getBoolean(Const.OngoingKEY, false) + sp.getBoolean(Const.LocationUpDateKEY, false));
+        if (s.equals(Utils.OngoingKEY)) {
+           // setUIState(sp.getBoolean(Const.LocationUpDateKEY, false), sp.getBoolean(Const.OngoingKEY, false));
+            Log.d("debug", "2:LocationUpdate,OnGoingCondition:" + sp.getBoolean(Utils.OngoingKEY, false) + sp.getBoolean(Utils.LocationUpDateKEY, false));
 
         }
+
+        /*
+        if(s.equals(Utils.EmailKEY)){
+            email = sp.getString(Utils.EmailKEY,"");
+        }
+
+        if(s.equals(Utils.TokenKey)){
+            token = sp.getString(Utils.TokenKey,"");
+        }
+
+        if(s.equals(Utils.DestemailKEY)){
+            destemail = sp.getString(Utils.DestemailKEY,"");
+        }
+
+        if(s.equals(Utils.DestaddressKEY)){
+            destaddress = sp.getString(Utils.DestaddressKEY,"");
+        }
+
+        if(s.equals(Utils.DestnameKEY)){
+            destname = sp.getString(Utils.DestnameKEY,"");
+        }
+*/
+
 
         //memo: ユーザーがログアウトなどして、Emptyになったら、OnGoingを外す。
         if (Utils.isEmptyUser(getActivity())) {
             Utils.setOnGoing(getActivity(), false);
-            setUIState(sp.getBoolean(Const.LocationUpDateKEY, false), sp.getBoolean(Const.OngoingKEY, false));
-            Log.d("debug", "3:LocationUpdate,OnGoingCondition:" + sp.getBoolean(Const.OngoingKEY, false) + sp.getBoolean(Const.LocationUpDateKEY, false));
+            //setUIState(sp.getBoolean(Const.LocationUpDateKEY, false), sp.getBoolean(Const.OngoingKEY, false));
+            Log.d("debug", "3:LocationUpdate,OnGoingCondition:" + sp.getBoolean(Utils.OngoingKEY, false) + sp.getBoolean(Utils.LocationUpDateKEY, false));
         }
 
         //memo: 目的地が途中で変更されたら、onGoingを外す。
-        if (Utils.isEmptyDest(getActivity())) {
+        if (Utils.onGoing(getActivity()) && Utils.isEmptyDest(getActivity())) {
+            // 1.Serviceをとめる（＝APIを止める）
+            mService.removeLocationUpdates();
+            // 2.onGoingをとめる
             Utils.setOnGoing(getActivity(), false);
-            setUIState(sp.getBoolean(Const.LocationUpDateKEY, false), sp.getBoolean(Const.OngoingKEY, false));
-            Log.d("debug", "4:LocationUpdate,OnGoingCondition:" + sp.getBoolean(Const.OngoingKEY, false) + sp.getBoolean(Const.LocationUpDateKEY, false));
+            //setUIState(Utils.requestingLocationUpdates(MainActivity.this));
+            // 3.目的地を削除する
+            Utils.removeThisDest(getActivity());
+            // 4.地図を戻す
+            defaultMap();
+            // 5.Buttonを戻す
+            setUIState(Utils.requestingLocationUpdates(getActivity()), Utils.onGoing(getActivity()));
+            Log.d("debug", "4:LocationUpdate,OnGoingCondition:" + sp.getBoolean(Utils.OngoingKEY, false) + sp.getBoolean(Utils.LocationUpDateKEY, false));
         }
 
 
-        email = sp.getString(Const.EmailKEY, "");
-        token = sp.getString(Const.TokenKey, "");
-        //memo: 現在設定されている目的地の取得
 
-
-        destname = sp.getString(Const.DestnameKEY, "");
-        destaddress = sp.getString(Const.DestaddressKEY, "");
-        destemail = sp.getString(Const.DestemailKEY, "");
-        latitude = sp.getString(Const.DestLatitudeKEY, "");
-        longitude = sp.getString(Const.DestLongitudeKEY, "");
-
-        Log.d("where is dest","fragmentPreference"+PreferenceManager.getDefaultSharedPreferences(getActivity()).getString(Const.DestnameKEY, ""));
-        Log.d("where is dest","fragmentPreference"+PreferenceManager.getDefaultSharedPreferences(getActivity()).getString(Const.DestLongitudeKEY, ""));
-
+/*
         StackTraceElement ste = Thread.currentThread().getStackTrace()[3];
         System.out.println("caller class:" + ste.getClassName() + " metho:" + ste.getMethodName() + " line:" + ste.getLineNumber());
-
-
-
-
         Map<String,?> map = sp.getAll();
         for( Map.Entry<String, ?> entry : map.entrySet() )
         {
@@ -412,7 +420,7 @@ public class GmapFragment extends Fragment implements SharedPreferences.OnShared
             String msg=String.format( "%s = %s", key, value );
             Log.v( "LogSample", msg );
         }
-
+*/
 
     }
     private boolean checkPermissions() {
@@ -521,7 +529,7 @@ public class GmapFragment extends Fragment implements SharedPreferences.OnShared
                 //出発！
                 mRequestLocationUpdatesButton.setEnabled(true);
                 mRequestLocationUpdatesButton.setText("出発");
-                mRemoveLocationUpdatesButton.setEnabled(false);
+                mRemoveLocationUpdatesButton.setEnabled(true);
                 //FirstMap()
                 Toast.makeText(getActivity().getApplicationContext(), "目的地をセットしました", Toast.LENGTH_SHORT).show();
             } else {
@@ -569,8 +577,6 @@ public class GmapFragment extends Fragment implements SharedPreferences.OnShared
     public void onMapReady(GoogleMap googleMap) {
         Log.d("onMapReady", "when do you call me?");
         mMap = googleMap;
-        Log.d("where is dest","onMapReady"+PreferenceManager.getDefaultSharedPreferences(getActivity()).getString(Const.DestnameKEY, ""));
-        Log.d("where is dest","onMapReady"+PreferenceManager.getDefaultSharedPreferences(getActivity()).getString(Const.DestLongitudeKEY, ""));
 
         defaultMap();
 
@@ -601,18 +607,18 @@ public class GmapFragment extends Fragment implements SharedPreferences.OnShared
     }
 
     private void firstMap() {
-
+        mMap.clear();
         if (currentMarker != null) {
             currentMarker.remove();
         }
 
+
         UiSettings us = mMap.getUiSettings();
         us.setMapToolbarEnabled(false);
 
-
-        destlatitude = Double.parseDouble(PreferenceManager.getDefaultSharedPreferences(getActivity()).getString(Const.DestLatitudeKEY, ""));
-        destlongitude = Double.parseDouble(PreferenceManager.getDefaultSharedPreferences(getActivity()).getString(Const.DestLongitudeKEY, ""));
-        destname = PreferenceManager.getDefaultSharedPreferences(getActivity()).getString(Const.DestnameKEY,"");
+        destlatitude = Double.parseDouble(Utils.getDestLatitude(getActivity()));
+        destlongitude = Double.parseDouble(Utils.getDestLongitude(getActivity()));
+        destname = Utils.getDestName(getActivity());
         latlng = new LatLng(destlatitude, destlongitude);
         setMarker(destlatitude, destlongitude,destname);
 
@@ -659,8 +665,6 @@ public class GmapFragment extends Fragment implements SharedPreferences.OnShared
         originaldistance = results[0] / 1000;
         Log.d("debug","originaldistance"+originaldistance);
 
-
-
         referencedistance = originaldistance * 0.3;
         Log.d("debug","referencedistance"+referencedistance);
 
@@ -677,11 +681,12 @@ public class GmapFragment extends Fragment implements SharedPreferences.OnShared
     }
 
     private void activeMap() {
-
+        mMap.clear();
         if (currentMarker != null) {
             currentMarker.remove();
 
         }
+
         // 設定の取得
         UiSettings settings = mMap.getUiSettings();
         settings.setZoomControlsEnabled(true);
@@ -690,13 +695,14 @@ public class GmapFragment extends Fragment implements SharedPreferences.OnShared
        // currentlongitude = mCurrentLocation.getLongitude();
 
         //memo: 目的地をセット
+        /*
         destlatitude = Double.parseDouble(PreferenceManager.getDefaultSharedPreferences(getActivity()).getString(Const.DestLatitudeKEY, ""));
         destlongitude = Double.parseDouble(PreferenceManager.getDefaultSharedPreferences(getActivity()).getString(Const.DestLongitudeKEY, ""));
         destname = PreferenceManager.getDefaultSharedPreferences(getActivity()).getString(Const.DestnameKEY,"");
 
         latlng = new LatLng(destlatitude, destlongitude);
         setMarker(destlatitude, destlongitude,destname );
-
+        */
         //memo:　現在位置をセット
 
         //noinspection MissingPermission,ResourceType
@@ -767,6 +773,8 @@ public class GmapFragment extends Fragment implements SharedPreferences.OnShared
         mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, width, height, 0));
 
     }
+
+    /*
     public void saveOriginaldistancedata(float originaldistance) {
 
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
@@ -784,5 +792,5 @@ public class GmapFragment extends Fragment implements SharedPreferences.OnShared
         editor.commit();
         Log.d("originaldestance", "Value"+ originaldistance);
         Log.d("originaldestance", "set"); //FirstMapで何度も呼ばれ無いように１通目のメールに連動させる。
-    }
+    }*/
 }

@@ -184,8 +184,7 @@ public class SettingActivity extends AppCompatActivity implements SharedPreferen
         //memo: 機能していない？
         mDestAdapter.notifyDataSetChanged();
 
-
-        //memo: ListViewをタップしたときの処理(目的地の編集画面に行く時のリスナー）
+        //memo: ListViewをタップしたときの処理(目的地の詳細画面に行く時のリスナー）
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -193,12 +192,10 @@ public class SettingActivity extends AppCompatActivity implements SharedPreferen
 
                 dest = (Dest) parent.getAdapter().getItem(position);
 
-
                 Log.d("PositionID",String.valueOf(dest.getPositionId()));
                 Log.d("id",String.valueOf(dest.getId()));
                 Log.d("name",String.valueOf(dest.getDestName()));
                 Log.d("Url",String.valueOf(dest.getDestUrl()));
-
 
                 //memo: destのIDを送る
                 Intent intent = new Intent(SettingActivity.this, DestActivity.class);
@@ -208,7 +205,7 @@ public class SettingActivity extends AppCompatActivity implements SharedPreferen
 
             }
         });
-
+/*
         //memo: ListViewを長押ししたときの処理
         mListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
@@ -220,9 +217,7 @@ public class SettingActivity extends AppCompatActivity implements SharedPreferen
 
                 dest = (Dest) parent.getAdapter().getItem(position);
                 // ダイアログを表示する
-
                 AlertDialog.Builder builder = new AlertDialog.Builder(SettingActivity.this);
-
                 builder.setTitle("削除");
                 builder.setMessage(dest.getDestName() + "を削除しますか");
                 builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
@@ -230,22 +225,17 @@ public class SettingActivity extends AppCompatActivity implements SharedPreferen
                     public void onClick(DialogInterface dialog, int which) {
                         //Rails側削除
                         //   new deletedest().execute(String.valueOf(dest.getDestUrl()));
-
                         String url = String.valueOf(dest.getDestUrl());
                         mProgress.show();
-
                         new ApiBase(SettingActivity.this).deleteDirectionAsync(apiemail,apitoken,url).onSuccessTask(new Continuation<String ,Task<String>>(){
                             @Override
                             public Task<String> then(Task<String> task) throws Exception {
-
-
                                 return new ApiBase(SettingActivity.this).getDirectionsAsync(apiemail,apitoken);
                             }
 
                         }).onSuccessTask(new Continuation<String, Task<String>>(){
                             @Override
                             public Task<String> then(Task<String> task) throws Exception{
-
 
                                 return new ApiBase(SettingActivity.this).saveDestinationdata(task.getResult());
                             }
@@ -266,37 +256,28 @@ public class SettingActivity extends AppCompatActivity implements SharedPreferen
                                 Log.d("Thread","LoginActLoginContinuewwith"+Thread.currentThread().getName());
                                 mProgress.dismiss();
                                 //finish();
-
                                 if (task.isFaulted()) {
                                     Exception e = task.getError();
-
                                     Log.d("debug2",e.toString());
                                     Log.e("hoge","error", e);
                                     //エラー処理
-
                                     Toast.makeText(SettingActivity.this,"目的地の削除に失敗しました。",Toast.LENGTH_SHORT).show();
                                 }
                                 return null;
                             }
                         }, Task.UI_THREAD_EXECUTOR);
-
-
                     }
                 });
                 // アラートダイアログのキャンセルボタンを設定します。nullは何もしない。
                 builder.setNegativeButton("CANCEL", null);
-
                 //AlertDialog dialog = builder.create();
-
                 // アラートダイアログを表示します
                 builder.show();
-
-
                 return true;
             }
         });
 
-
+*/
         reloadListView();
 
     }
@@ -373,7 +354,7 @@ public class SettingActivity extends AppCompatActivity implements SharedPreferen
 
     public void getDest(){
 
-        new ApiBase(SettingActivity.this).getDirectionsAsync(apiemail,apitoken).onSuccessTask(new Continuation<String, Task<String>>(){
+        new ApiBase(SettingActivity.this).getDirectionsAsync().onSuccessTask(new Continuation<String, Task<String>>(){
             @Override
             public Task<String> then(Task<String> task) throws Exception {
 

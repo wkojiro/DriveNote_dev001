@@ -1,6 +1,7 @@
 package jp.techacademy.wakabayashi.kojiro.drivenote_dev001;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.location.Location;
@@ -54,10 +55,11 @@ public class Utils {
     }
 
 
-    //memo: ユーザー登録
-    public static void setLoggedInUser(Context context, String username , String email , String token){
+    //memo: ユーザー登録(useridは本当はいらないかもしれない）
+    public static void setLoggedInUser(Context context, int userid , String username , String email , String token){
         PreferenceManager.getDefaultSharedPreferences(context)
                 .edit()
+                .putInt(UidKEY,userid)
                 .putString(UnameKEY,username)
                 .putString(EmailKEY,email)
                 .putString(TokenKey,token)
@@ -134,8 +136,37 @@ public class Utils {
                 .remove(DestemailKEY)
                 .remove(DestLatitudeKEY)
                 .remove(DestLongitudeKEY)
-                .apply();
+                .commit();
     }
+
+    //memo:
+    public static String getDestName(Context context){
+        return PreferenceManager.getDefaultSharedPreferences(context)
+                .getString(DestnameKEY,"");
+    }
+
+    public static String getDestAddress(Context context){
+        return PreferenceManager.getDefaultSharedPreferences(context)
+                .getString(DestaddressKEY,"");
+    }
+
+    public static String getDestEmail(Context context){
+        return PreferenceManager.getDefaultSharedPreferences(context)
+                .getString(DestemailKEY,"");
+    }
+
+    public static String getDestLatitude(Context context){
+        return PreferenceManager.getDefaultSharedPreferences(context)
+                .getString(DestLatitudeKEY,"");
+    }
+
+    public static String getDestLongitude(Context context){
+        return PreferenceManager.getDefaultSharedPreferences(context)
+                .getString(DestLongitudeKEY,"");
+    }
+
+
+
 
     //memo:　ユーザー存在確認
     public static boolean isEmptyUser(Context context) {
@@ -146,11 +177,6 @@ public class Utils {
     //memo:　目的地の存在確認
     public static boolean isEmptyDest(Context context){
 
-        Log.d("debug_Utils","isEmptyDest"+PreferenceManager.getDefaultSharedPreferences(context).getString(Const.DestnameKEY, ""));
-        Log.d("debug_Utils","isEmptyDest"+PreferenceManager.getDefaultSharedPreferences(context).getString(Const.DestaddressKEY, ""));
-        Log.d("debug_Utils","isEmptyDest"+PreferenceManager.getDefaultSharedPreferences(context).getString(Const.DestemailKEY, ""));
-        Log.d("debug_Utils","isEmptyDest"+PreferenceManager.getDefaultSharedPreferences(context).getString(Const.DestLatitudeKEY, ""));
-        Log.d("debug_Utils","isEmptyDest"+PreferenceManager.getDefaultSharedPreferences(context).getString(Const.DestLongitudeKEY, ""));
         return PreferenceManager.getDefaultSharedPreferences(context).getString(Const.DestnameKEY, "").equals("")
                 && PreferenceManager.getDefaultSharedPreferences(context).getString(Const.DestaddressKEY, "").equals("")
                 && PreferenceManager.getDefaultSharedPreferences(context).getString(Const.DestemailKEY, "").equals("")
@@ -218,6 +244,18 @@ public class Utils {
     static String getLocationTitle(Context context) {
         return context.getString(R.string.location_updated,
                 DateFormat.getDateTimeInstance().format(new Date()));
+    }
+
+
+    static void resetApp() {
+
+        //service を止める
+        //Destinationを削除する
+
+        setRequestingLocationUpdates(null,false);
+        removeThisDest(null);
+        Log.d("debug","resetApp");
+
     }
 }
 

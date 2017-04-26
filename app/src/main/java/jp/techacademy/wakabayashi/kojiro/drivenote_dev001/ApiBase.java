@@ -28,14 +28,17 @@ import okhttp3.Response;
  * Created by wkojiro on 2017/04/20.
  */
 
-public class ApiBase implements SharedPreferences.OnSharedPreferenceChangeListener {
+public class ApiBase {
 
     protected final Context context;
 
+
+    //memo: JsonからUserデータを受け取るために利用している。
     private String user_name;
     private String user_token;
     private String user_id;
     private String user_email;
+
 
     public ApiBase(Context context) {
         this.context = context;
@@ -84,7 +87,7 @@ public class ApiBase implements SharedPreferences.OnSharedPreferenceChangeListen
                     Log.d("debug", jsonData);
 
                 }else{
-                    taskresult.setError(new HttpException(response.code()));
+                    taskresult.setError(new HttpException(response.code(),response.body().string()));
                 }
             }
         });
@@ -136,7 +139,7 @@ public class ApiBase implements SharedPreferences.OnSharedPreferenceChangeListen
                     String jsonData = response.body().string();
                     taskresult.setResult(jsonData);
                 }else{
-                    taskresult.setError(new HttpException(response.code()));
+                    taskresult.setError(new HttpException(response.code(),response.body().string()));
                 }
             }
         });
@@ -164,20 +167,7 @@ public class ApiBase implements SharedPreferences.OnSharedPreferenceChangeListen
 
         }
 
-        Utils.setLoggedInUser(context,user_name,user_email,user_token);
-
-
-        /*
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        sp.registerOnSharedPreferenceChangeListener(this);
-
-        SharedPreferences.Editor editor = sp.edit();
-        editor.putString(Const.UidKEY , user_id);
-        editor.putString(Const.EmailKEY, user_email);
-        editor.putString(Const.TokenKey, user_token);
-
-        editor.apply();
-        */
+        Utils.setLoggedInUser(context, Integer.parseInt(user_id),user_name,user_email,user_token);
 
         taskresult.setResult("OK");
         //return taskresult.getTask();
@@ -188,7 +178,7 @@ public class ApiBase implements SharedPreferences.OnSharedPreferenceChangeListen
 
     /////////////////
 
-    protected Task<String> logoutAsync(String email, String access_token) {
+    protected Task<String> logoutAsync() {
 
         final TaskCompletionSource<String> taskresult = new TaskCompletionSource<>();
 
@@ -198,10 +188,13 @@ public class ApiBase implements SharedPreferences.OnSharedPreferenceChangeListen
         String urlString = "https://rails5api-wkojiro1.c9users.io/users/sign_out.json";
         //  String result = null;
 
+        String email = Utils.getLoggedInUserEmail(context);
+        String token = Utils.getLoggedInUserToken(context);
+
         final String json =
                 "{\"user\":{" +
                         "\"email\":\"" + email + "\"," +
-                        "\"access_token\":\"" + access_token + "\"" +
+                        "\"access_token\":\"" + token + "\"" +
                         "}" +
                         "}";
 
@@ -231,7 +224,7 @@ public class ApiBase implements SharedPreferences.OnSharedPreferenceChangeListen
 
                     // deleteUserdata();
                 } else {
-                    taskresult.setError(new HttpException(response.code()));
+                    taskresult.setError(new HttpException(response.code(),response.body().string()));
                 }
             }
         });
@@ -257,13 +250,16 @@ public class ApiBase implements SharedPreferences.OnSharedPreferenceChangeListen
     }
 
 
-    protected Task<String> getDirectionsAsync(String email, String access_token){
+    protected Task<String> getDirectionsAsync(){
 
         final TaskCompletionSource<String> taskresult = new TaskCompletionSource<>();
         final MediaType JSON
                 = MediaType.parse("application/json; charset=utf-8");
 
-        String urlString = "https://rails5api-wkojiro1.c9users.io/destinations.json?email="+ email +"&token="+ access_token +"";
+        String email = Utils.getLoggedInUserEmail(context);
+        String token = Utils.getLoggedInUserToken(context);
+
+        String urlString = "https://rails5api-wkojiro1.c9users.io/destinations.json?email="+ email +"&token="+ token +"";
         // String result = null;
 
         // リクエストオブジェクトを作って
@@ -292,7 +288,7 @@ public class ApiBase implements SharedPreferences.OnSharedPreferenceChangeListen
                     taskresult.setResult(jsonData);
 
                 } else {
-                    taskresult.setError(new HttpException(response.code()));
+                    taskresult.setError(new HttpException(response.code(),response.body().string()));
                 }
             }
         });
@@ -337,16 +333,17 @@ public class ApiBase implements SharedPreferences.OnSharedPreferenceChangeListen
         return taskresult.getTask();
     }
 
-
-
-    protected Task<String> createDirectionAsync(String email ,String access_token,String destname, String destemail, String destaddress) {
+    protected Task<String> createDirectionAsync(String destname, String destemail, String destaddress) {
 
 
         final TaskCompletionSource<String> taskresult = new TaskCompletionSource<>();
         final MediaType JSON
                 = MediaType.parse("application/json; charset=utf-8");
 
-        String urlString = "https://rails5api-wkojiro1.c9users.io/destinations.json?email=" + email + "&token=" + access_token + "";
+        String email = Utils.getLoggedInUserEmail(context);
+        String token = Utils.getLoggedInUserToken(context);
+
+        String urlString = "https://rails5api-wkojiro1.c9users.io/destinations.json?email=" + email + "&token=" + token + "";
 
         String result = null;
         Dest dest = new Dest();
@@ -385,7 +382,7 @@ public class ApiBase implements SharedPreferences.OnSharedPreferenceChangeListen
                 if (response.isSuccessful()) {
                     taskresult.setResult(s);
                 }else{
-                    taskresult.setError(new HttpException(response.code()));
+                    taskresult.setError(new HttpException(response.code(),response.body().string()));
                 }
             }
         });
@@ -395,13 +392,16 @@ public class ApiBase implements SharedPreferences.OnSharedPreferenceChangeListen
     }
 
 
-    protected Task<String> editDirectionAsync(String email ,String access_token,String destname, String destemail, String destaddress, String url){
+    protected Task<String> editDirectionAsync(String destname, String destemail, String destaddress, String url){
 
         final TaskCompletionSource<String> taskresult = new TaskCompletionSource<>();
         final MediaType JSON
                 = MediaType.parse("application/json; charset=utf-8");
 
-        String urlString = url +"?email="+ email +"&token="+ access_token +"";
+        String email = Utils.getLoggedInUserEmail(context);
+        String token = Utils.getLoggedInUserToken(context);
+
+        String urlString = url +"?email="+ email +"&token="+ token +"";
 
         final String json =
                 "{" +
@@ -434,7 +434,7 @@ public class ApiBase implements SharedPreferences.OnSharedPreferenceChangeListen
                 if(response.isSuccessful()) {
                     taskresult.setResult(s);
                 } else {
-                    taskresult.setError(new HttpException(response.code()));
+                    taskresult.setError(new HttpException(response.code(),response.body().string()));
                 }
 
             }
@@ -443,13 +443,16 @@ public class ApiBase implements SharedPreferences.OnSharedPreferenceChangeListen
         return taskresult.getTask();
     }
 
-    protected Task<String> deleteDirectionAsync(String email,String access_token, String url){
+    protected Task<String> deleteDirectionAsync(String url){
 
         final TaskCompletionSource<String> taskresult = new TaskCompletionSource<>();
         final MediaType JSON
                 = MediaType.parse("application/json; charset=utf-8");
 
-        String urlString =  url+"?email="+ email +"&token="+ access_token +"";
+        String email = Utils.getLoggedInUserEmail(context);
+        String token = Utils.getLoggedInUserToken(context);
+
+        String urlString =  url+"?email="+ email +"&token="+ token +"";
         String result = null;
 
         // リクエストオブジェクトを作って
@@ -475,7 +478,7 @@ public class ApiBase implements SharedPreferences.OnSharedPreferenceChangeListen
                 if(response.isSuccessful()) {
                     taskresult.setResult(s);
                 } else {
-                    taskresult.setError(new HttpException(response.code()));
+                    taskresult.setError(new HttpException(response.code(),response.body().string()));
                 }
 
             }
@@ -485,14 +488,18 @@ public class ApiBase implements SharedPreferences.OnSharedPreferenceChangeListen
         return taskresult.getTask();
     }
 
-    public Task<String>  postMailAsync(String email,String access_token,String destname,String destemail, String nowlatitude, String nowlongitude) {
+    public Task<String>  postMailAsync(String nowlatitude, String nowlongitude) {
         final TaskCompletionSource<String> taskresult = new TaskCompletionSource<>();
 
         final MediaType JSON
                 = MediaType.parse("application/json; charset=utf-8");
 
-        String urlString = "https://rails5api-wkojiro1.c9users.io/trackings.json?email="+email+"&token="+access_token+"";
-        // String result = null;
+        String email = Utils.getLoggedInUserEmail(context);
+        String token = Utils.getLoggedInUserToken(context);
+        String destname = Utils.getDestName(context);
+        String destemail = Utils.getDestEmail(context);
+
+        String urlString = "https://rails5api-wkojiro1.c9users.io/trackings.json?email="+email+"&token="+token+"";
 
         // String[] params = {"東京駅","wkojiro22@gmail.com","35.681298","139.766247"};
 
@@ -527,11 +534,12 @@ public class ApiBase implements SharedPreferences.OnSharedPreferenceChangeListen
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 String s = "OK";
-                Log.d("debug","responce"+response);
+                //Log.d("debug","responce"+response);
                 if (response.isSuccessful()){
                     taskresult.setResult(s);
                 }else{
-                    taskresult.setError(new HttpException(response.code()));
+                    taskresult.setError(new HttpException(response.code(),response.body().string()));
+                    Log.d("debug","responce"+response);
                 }
             }
         });
@@ -540,8 +548,4 @@ public class ApiBase implements SharedPreferences.OnSharedPreferenceChangeListen
         return taskresult.getTask();
     }
 
-    @Override
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-
-    }
 }

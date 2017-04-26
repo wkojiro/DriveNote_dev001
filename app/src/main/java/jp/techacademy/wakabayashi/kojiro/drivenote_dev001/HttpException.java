@@ -7,7 +7,11 @@ package jp.techacademy.wakabayashi.kojiro.drivenote_dev001;
 
 public class HttpException extends Exception{
     private final int httpCode;
-    public HttpException(int httpCode) {
+
+    public String body;
+    public HttpException(int httpCode, String body) {
+        super(body);
         this.httpCode = httpCode;
+        this.body = body;
     }
 }
