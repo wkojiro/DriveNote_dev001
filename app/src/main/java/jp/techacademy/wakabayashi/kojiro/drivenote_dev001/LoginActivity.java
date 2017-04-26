@@ -307,11 +307,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
     public void userLogin(String email,String password){
 
-        /*
-       String mEmail,mPassword;
-       mEmail = email;
-       mPassword = password;
-       */
 
         new ApiBase(LoginActivity.this).loginAsync(email,password).onSuccessTask(new Continuation<String, Task<String>>() {
             @Override
@@ -328,6 +323,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
                 Log.d("Thread", "LoginActLoginOnSuccess" + Thread.currentThread().getName());
                 Toast.makeText(LoginActivity.this,"ログインしました",Toast.LENGTH_SHORT).show();
+                Utils.setUserLoginStatus(LoginActivity.this,true);
 
                 finish();
 

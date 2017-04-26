@@ -7,6 +7,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.location.Location;
 import android.os.Binder;
@@ -14,17 +15,23 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.model.LatLng;
+
+import bolts.Continuation;
+import bolts.Task;
 
 /**
  * A bound and started service that is promoted to a foreground service when location updates have
@@ -41,7 +48,7 @@ import com.google.android.gms.location.LocationServices;
  * notification assocaited with that service is removed.
  */
 public class LocationUpdatesService extends Service implements GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener, LocationListener {
+        GoogleApiClient.OnConnectionFailedListener, LocationListener,SharedPreferences.OnSharedPreferenceChangeListener {
 
     private static final String PACKAGE_NAME =
             "jp.techacademy.wakabayashi.kojiro.drivenote_dev001";
@@ -51,6 +58,7 @@ public class LocationUpdatesService extends Service implements GoogleApiClient.C
     public static final String ACTION_BROADCAST = PACKAGE_NAME + ".broadcast";
 
     public static final String EXTRA_LOCATION = PACKAGE_NAME + ".location";
+    static final String EXTRA_DESTANCE = PACKAGE_NAME + ".destance";
     private static final String EXTRA_STARTED_FROM_NOTIFICATION = PACKAGE_NAME +
             ".started_from_notification";
 
@@ -92,6 +100,38 @@ public class LocationUpdatesService extends Service implements GoogleApiClient.C
     private LocationRequest mLocationRequest;
 
     private Handler mServiceHandler;
+
+    /**
+     * The current location.
+     */
+
+
+    private Float distance;
+
+
+    //memo: preferenceから現在登録されているユーザーを受け取る為の変数
+    String username;
+    String email;
+    String access_token;
+
+
+    //memo: preferenceから現在登録されている目的地を受け取る為の変数
+    String address;
+    String latitude; //StringにしているけどFloat
+    String longitude;//StringにしているけどFloat
+    String destname;
+    String destemail;
+    float originaldistance;
+    private Double destlatitude, destlongitude,currentlatitude,currentlongitude;
+    private LatLng latlng;
+
+    Float nowdistance;
+
+    Integer mailCount = 0;
+
+    protected Location mCurrentLocation;
+    protected LatLng currentlatlng;
+
 
     /**
      * The current location.
@@ -286,7 +326,19 @@ public class LocationUpdatesService extends Service implements GoogleApiClient.C
 
         // Notify anyone listening for broadcasts about the new location.
         Intent intent = new Intent(ACTION_BROADCAST);
+
+        //memo: onLocationChangedが呼ばれるたびに呼ばれる。（目的地があれば現在位置との距離を測れる）
+        if (!Utils.isEmptyDest(this)) {
+            //memo: 目的地がないと落ちそう。
+            Double distance = getDistance(location);
+            Log.d("debug","呼ばれるたびにgetDistance");
+            //memo: 目的地がないと落ちそう。この設定だと目的地があれば何度もメールを送ることになる。取り合えずこのままにしておく。
+            postMyPosition(distance);
+
+            intent.putExtra(EXTRA_DESTANCE, distance);
+        }
         intent.putExtra(EXTRA_LOCATION, location);
+
         LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
 
         // Update notification content if running as a foreground service.
@@ -333,4 +385,141 @@ public class LocationUpdatesService extends Service implements GoogleApiClient.C
         }
         return false;
     }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sp, String key) {
+        Log.d("service","onSharedPreferenceChanged");
+        username = sp.getString(Const.UnameKEY, "");
+        email = sp.getString(Const.EmailKEY, "");
+        access_token = sp.getString(Const.TokenKey, "");
+
+        destname = sp.getString(Const.DestnameKEY, "");
+        address = sp.getString(Const.DestaddressKEY, "");
+        destemail = sp.getString(Const.DestemailKEY, "");
+        latitude = sp.getString(Const.DestLatitudeKEY, "");
+        longitude = sp.getString(Const.DestLongitudeKEY, "");
+
+
+        //originaldistance = sp.getFloat(Const.ODISTANCEKEY, -1.00F);
+
+        Log.d("debug", latitude);
+        //本来はoriginaldestanceが欲しい
+
+        /*
+        if (!Utils.isEmptyDest(this)) {
+            destlatitude = Double.parseDouble(latitude);
+            destlongitude = Double.parseDouble(longitude);
+
+            latlng = new LatLng(destlatitude, destlongitude);
+            Log.d("debug", "onSharedPreferenceChangedListner_setMarkerが呼ばれる");
+            // 標準のマーカー
+            //setMarker(destlatitude, destlongitude);
+
+
+            //originaldistanceがすんなり取れるとは思えない。
+            if(sp.getString(Const.ODISTANCEKEY, "") != "") {
+                originaldistance = Float.parseFloat(sp.getString(Const.ODISTANCEKEY, ""));
+                Log.d("debug", "onSharedPreferenceChangedListnerでoriginaldistanceが保存された");
+            }
+        }
+        */
+
+    }
+
+    //memo:　目的地と現在位置の距離を取る（onLocationChangedが呼ばれるたびに計算する）
+    private Double getDistance(Location location){
+
+        currentlatitude = location.getLatitude();
+        currentlongitude = location.getLongitude();
+
+
+        email = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getString(Const.EmailKEY,"");
+        access_token = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getString(Const.TokenKey,"");
+        destlatitude = Double.parseDouble(PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getString(Const.DestLatitudeKEY, ""));
+        destlongitude = Double.parseDouble(PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getString(Const.DestLongitudeKEY, ""));
+        destname = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getString(Const.DestnameKEY,"");
+        destemail = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getString(Const.DestemailKEY,"");
+
+
+        latlng = new LatLng(destlatitude, destlongitude);
+
+        float[] results = new float[1];
+        Location.distanceBetween(destlatitude, destlongitude, currentlatitude, currentlongitude, results);
+        nowdistance = results[0]/1000;
+        Log.d("debug","getDistance_method"+nowdistance);
+
+        Double result = Double.parseDouble(nowdistance.toString());
+        Log.d("debug","getDistance_method"+result);
+
+        return result;
+    }
+
+
+    private void postMyPosition(Double nowdistance) {
+
+        originaldistance = Float.parseFloat(Utils.getOriginalDistance(getApplicationContext()));
+
+        //originaldistance = Utils.getOriginalDistance(getApplicationContext());
+
+        double referencedistance = originaldistance * 0.3;
+        Log.d("debug", "基準距離" + originaldistance);
+        Log.d("debug", "閾値" + referencedistance);
+        Log.d("debug", "現在の距離" + nowdistance);
+
+        double ans = nowdistance - referencedistance;
+
+        if(ans <= 0){
+            Log.d("debug","0以下");
+        }
+
+        Log.d("debug","answer"+ans);
+
+
+        destlatitude = Double.parseDouble(PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getString(Const.DestLatitudeKEY, ""));
+        destlongitude = Double.parseDouble(PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getString(Const.DestLongitudeKEY, ""));
+
+     //   if (nowdistance - referencedistance <= 0 && mailCount == 0) {
+
+        if(ans <= 0 && mailCount == 0){
+
+            Log.d("debug", "メールまでもう少し" +nowdistance);
+
+            String nowlatitude = String.valueOf(currentlatitude);
+            String nowlongitude = String.valueOf(currentlongitude);
+
+            new ApiBase(getApplicationContext()).postMailAsync(email, access_token, destname, destemail, nowlatitude, nowlongitude)
+                    .onSuccess(new Continuation<String, String>() {
+                        @Override
+                        public String then(Task<String> task) throws Exception {
+                            Toast.makeText(null, "メール送信しました。", Toast.LENGTH_SHORT).show();
+                            return null;
+                        }
+                    }, Task.UI_THREAD_EXECUTOR).continueWith(new Continuation<String, String>() {
+                @Override
+                public String then(Task<String> task) throws Exception {
+                    Log.d("Thread", "LoginActLoginContinuewwith" + Thread.currentThread().getName());
+
+                    if (task.isFaulted()) {
+                        Toast.makeText(null, "メール送信に失敗しました。", Toast.LENGTH_SHORT).show();
+                        Log.d("debug", "70%メール送信していません。");
+                    }
+                    return null;
+                }
+            }, Task.UI_THREAD_EXECUTOR);
+            Toast.makeText(this, "全行程の７０％を通過しました。", Toast.LENGTH_LONG).show();
+
+            mailCount = 1;
+
+        }
+
+        if (nowdistance <= 0.08) {
+
+            Toast.makeText(getApplicationContext(), "お疲れ様でした。到着しました。", Toast.LENGTH_LONG).show();
+
+        }
+    }
+
+
+
+
 }

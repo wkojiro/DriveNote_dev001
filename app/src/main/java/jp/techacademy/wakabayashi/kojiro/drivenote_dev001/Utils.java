@@ -2,6 +2,7 @@ package jp.techacademy.wakabayashi.kojiro.drivenote_dev001;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.location.Location;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -18,38 +19,131 @@ import java.util.Date;
 
 public class Utils {
 
-   // static final String KEY_REQUESTING_LOCATION_UPDATES = "requesting_locaction_updates";
+    // static final => クラス定数（再代入できない）何故これを定義するのか、よく分からない。
+    public static final String LocationUpDateKEY = "locaction_updates";
+    public static final String UidKEY = "id";
+    public static final String UnameKEY = "username"; //Preferenceにusernameを保存する時のキー
+    public static final String EmailKEY = "email"; // PreferenceにEmailを保存する時のキー
+    public static final String TokenKey = "access_token"; // PreferenceにTokenを保存する時のキー
+    public static final String RailsKEY = "id";// PreferenceにDestのIDを保存する時のキー
+    public static final String PositionKey = "position_id";
+    public static final String DestnameKEY = "destname";
+    public static final String DestemailKEY = "destemail";
+    public static final String DestaddressKEY = "destaddress";
+    public static final String DestLatitudeKEY = "latitude";
+    public static final String DestLongitudeKEY = "longitude";
+    public static final String ODISTANCEKEY = "originaldistance";
+    public static final String OngoingKEY = "ongoing";
+    public static final String LoginKEY = "login";
 
-    /**
-     * Returns true if requesting location updates, otherwise returns false.
-     *
-     * @param context The {@link Context}.
-     */
+
+
+
+    //memo:　ask RequestLocationUpdates
     public static boolean requestingLocationUpdates(Context context) {
         return PreferenceManager.getDefaultSharedPreferences(context)
-                .getBoolean(Const.LocationUpDateKEY, false);
+                .getBoolean(LocationUpDateKEY, false);
     }
 
-    /**
-     * Stores the location updates state in SharedPreferences.
-     * @param requestingLocationUpdates The location updates state.
-     */
+    //memo: Locationupdat　が走っていたらTrue
     public static void setRequestingLocationUpdates(Context context, boolean requestingLocationUpdates) {
         PreferenceManager.getDefaultSharedPreferences(context)
                 .edit()
-                .putBoolean(Const.LocationUpDateKEY, requestingLocationUpdates)
+                .putBoolean(LocationUpDateKEY, requestingLocationUpdates)
                 .apply();
     }
 
 
-    //memo: 外部からアクセスできるようにPublicにしていたらダメだった。staticにしたらできた
-    public static boolean isEmptyUser(Context context) {
-
-        return PreferenceManager.getDefaultSharedPreferences(context).getString(Const.EmailKEY, "").equals("")
-                && PreferenceManager.getDefaultSharedPreferences(context).getString(Const.TokenKey, "").equals("");
-
+    //memo: ユーザー登録
+    public static void setLoggedInUser(Context context, String username , String email , String token){
+        PreferenceManager.getDefaultSharedPreferences(context)
+                .edit()
+                .putString(UnameKEY,username)
+                .putString(EmailKEY,email)
+                .putString(TokenKey,token)
+                .apply();
     }
 
+    //memo: ユーザー情報取得(Email)
+    public static String getLoggedInUserEmail(Context context){
+        return PreferenceManager.getDefaultSharedPreferences(context)
+                .getString(EmailKEY,"");
+    }
+
+    //memo: ユーザー情報取得(Token)
+    public static String getLoggedInUserToken(Context context){
+        return PreferenceManager.getDefaultSharedPreferences(context)
+                .getString(TokenKey,"");
+    }
+
+    //memo: ユーザー情報取得(Username)
+    public static String getLoggedInUserName(Context context){
+        return PreferenceManager.getDefaultSharedPreferences(context)
+                .getString(UnameKEY,"");
+    }
+
+
+    //memo:ユーザーの存在確認（NewVersion)
+    public static void setUserLoginStatus(Context context, boolean status){
+        PreferenceManager.getDefaultSharedPreferences(context)
+                .edit()
+                .putBoolean(LoginKEY, status)
+                .apply();
+    }
+
+    public boolean getUserStatus(Context context){
+        return PreferenceManager.getDefaultSharedPreferences(context)
+                .getBoolean(LoginKEY,false);
+    }
+
+    //memo:ユーザーのログアウト
+    public static void removeUserInfo(Context context){
+        PreferenceManager.getDefaultSharedPreferences(context)
+                .edit()
+                .remove(UnameKEY)
+                .remove(EmailKEY)
+                .remove(TokenKey)
+                .apply();
+    }
+
+
+    //memo:  選択された目的地の登録
+    //IMPORTANT commit needed
+    public static void setDestination
+    (Context context, Integer railsid ,Integer positionid,String destname, String destaddress , String destemail, String destlatitude, String destlongitude){
+        PreferenceManager.getDefaultSharedPreferences(context)
+                .edit()
+                .putInt(RailsKEY, railsid)
+                .putInt(PositionKey, positionid)
+                .putString(DestnameKEY, destname)
+                .putString(DestaddressKEY, destaddress)
+                .putString(DestemailKEY, destemail)
+                .putString(DestLatitudeKEY,destlatitude)
+                .putString(DestLongitudeKEY,destlongitude)
+                .commit();
+    }
+
+    //memo:
+    public static void removeThisDest(Context context) {
+        PreferenceManager.getDefaultSharedPreferences(context)
+                .edit()
+                .remove(RailsKEY)
+                .remove(PositionKey)
+                .remove(DestnameKEY)
+                .remove(DestaddressKEY)
+                .remove(DestemailKEY)
+                .remove(DestLatitudeKEY)
+                .remove(DestLongitudeKEY)
+                .apply();
+    }
+
+    //memo:　ユーザー存在確認
+    public static boolean isEmptyUser(Context context) {
+        return PreferenceManager.getDefaultSharedPreferences(context).getString(Const.EmailKEY, "").equals("")
+                && PreferenceManager.getDefaultSharedPreferences(context).getString(Const.TokenKey, "").equals("");
+    }
+
+    //memo:　目的地の存在確認
     public static boolean isEmptyDest(Context context){
 
         Log.d("debug_Utils","isEmptyDest"+PreferenceManager.getDefaultSharedPreferences(context).getString(Const.DestnameKEY, ""));
@@ -65,24 +159,52 @@ public class Utils {
 
     }
 
+    //memo:　計測中かどうかの設定
     public static void setOnGoing(Context context, boolean onGoing) {
         PreferenceManager.getDefaultSharedPreferences(context)
                 .edit()
                 .putBoolean(Const.OngoingKEY, onGoing)
                 .apply();
     }
+
     public static boolean onGoing(Context context){
         return PreferenceManager.getDefaultSharedPreferences(context).getBoolean(Const.OngoingKEY,false);
     }
 
 
-    public static void deleteThisDest(Context context) {
-        //memo: 目的地を追加する際にすでにある目的地を消し、その後に追加する。
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        //sp.registerOnSharedPreferenceChangeListener(this);
-        sp.edit().remove("id").remove("position_id").remove("destname").remove("destaddress").remove("destemail").remove("latitude").remove("longitude").apply();
+    public static void removeOriginalDistance(Context context){
+        PreferenceManager.getDefaultSharedPreferences(context)
+                .edit()
+                .remove(ODISTANCEKEY)
+                .apply();
+
 
     }
+    //memo: Floatとして保存するとうまくいかないので、Stringで保存して使う時にFloatにする。
+
+    public static void setOriginalDistance(Context context, String originaldistance){
+        PreferenceManager.getDefaultSharedPreferences(context)
+                .edit()
+                .putString(ODISTANCEKEY, originaldistance)
+                .apply();
+
+    /*
+    public static void setOriginalDistance(Context context, float originaldistance){
+        PreferenceManager.getDefaultSharedPreferences(context)
+                .edit()
+                .putFloat(ODISTANCEKEY, originaldistance)
+                .apply();
+    */
+
+
+    }
+
+    public static String getOriginalDistance(Context context){
+        return PreferenceManager.getDefaultSharedPreferences(context)
+                .getString(ODISTANCEKEY,"");
+
+    }
+
 
     /**
      * Returns the {@code location} object as a human readable string.

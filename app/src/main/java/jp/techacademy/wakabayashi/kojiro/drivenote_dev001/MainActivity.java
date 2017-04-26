@@ -57,10 +57,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
    // private MyReceiver myReceiver;
 
     // A reference to the service used to get location updates.
-    private LocationUpdatesService mService = null;
+   // private LocationUpdatesService mService = null;
 
     // Tracks the bound state of the service.
-    private boolean mBound = false;
+  //  private boolean mBound = false;
 
     // UI elements.
     private Button mRequestLocationUpdatesButton;
@@ -168,7 +168,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             // fm.beginTransaction().replace(R.id, new ImportFragment()).commit();
         } else if (id == R.id.nav_life) {
 
-
         } else if (id == R.id.nav_health) {
 
         } else if (id == R.id.nav_compter) {
@@ -192,6 +191,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 public String then(Task<String> task) throws Exception {
 
                     Toast.makeText(MainActivity.this,"ログアウトしました。",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this,String.valueOf(Utils.isEmptyUser(MainActivity.this)),Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this,String.valueOf(Utils.isEmptyDest(MainActivity.this)),Toast.LENGTH_SHORT).show();
+                  //  Utils.isEmptyDest(MainActivity.this);
                     //finish();
                     return null;
                 }

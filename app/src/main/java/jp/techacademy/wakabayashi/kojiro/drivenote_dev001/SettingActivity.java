@@ -356,7 +356,7 @@ public class SettingActivity extends AppCompatActivity implements SharedPreferen
         Log.d("debug","SettingActivity: PreferenceChanged");
 
        Log.d("debug","isEmptyDest"+Utils.isEmptyDest(this));
-       Log.d("debug","latitude"+sharedPreferences.getString(Const.DestLatitudeKEY, ""));
+
 
 
 
@@ -413,47 +413,24 @@ public class SettingActivity extends AppCompatActivity implements SharedPreferen
 
 
     public void addDestination(Integer selected_id) {
-        Log.d("selected_position",String.valueOf(selected_id));
-
-        //  final Dest dest = (Dest) parent.getAdapter().getItem(selected_position);
 
         Realm realm = Realm.getDefaultInstance();
 
-        //Integer railsid = -1;
-
-
-        //memo: destIdで検索して当該のデータを取得 positionは０はじまり、position_idは１はじまりだから＋１する。
-        /*
-         本来的にはRailsIDで検索をかけ、保存するようにしたい。
-         */
-        // destRealm = realm.where(Dest.class).equalTo("position_id", selected_id +1 ).findFirst();
+        // RailsIdを元に検索をかけている。
         destRealm = realm.where(Dest.class).equalTo("id", selected_id ).findFirst();
         realm.close();
 
         //memo: 目的地を追加する際にすでにある目的地を消し、その後に追加する。
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
-        sp.registerOnSharedPreferenceChangeListener(this);
-        sp.edit().remove("id").remove("position_id").remove("destname").remove("destaddress").remove("destemail").remove("latitude").remove("longitude").apply();
-
-        SharedPreferences.Editor editor = sp.edit();
-        editor.putInt(Const.RailsKEY,destRealm.getId());
-        editor.putInt(Const.PositionKey,destRealm.getPositionId());
-        editor.putString(Const.DestnameKEY , destRealm.getDestName());
-        editor.putString(Const.DestaddressKEY, destRealm.getDestAddress());
-        editor.putString(Const.DestemailKEY, destRealm.getDestEmail());
-        editor.putString(Const.DestLatitudeKEY, destRealm.getDestLatitude());
-        editor.putString(Const.DestLongitudeKEY, destRealm.getDestLongitude());
-
-        editor.apply();
+        Utils.removeThisDest(this);
+        Utils.setDestination(this,destRealm.getId(),destRealm.getPositionId(),destRealm.getDestName(),destRealm.getDestAddress(),destRealm.getDestEmail(),destRealm.getDestLatitude(),destRealm.getDestLongitude());
 
         Toast.makeText(this, "目的地を設定しました", Toast.LENGTH_LONG).show();
-
 
         //memo: ここで目的地が変更されるなどした場合に地図などをClear（Reset)にするためのIntentを戻している。
         Intent resultintent = new Intent();
         resultintent.putExtra("Result","OK");
         setResult(RESULT_OK,resultintent);
-        //finish();
+        finish();
 
     }
 }

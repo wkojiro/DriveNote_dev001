@@ -1,6 +1,8 @@
 package jp.techacademy.wakabayashi.kojiro.drivenote_dev001;
 
 import android.app.Application;
+import android.util.Log;
+
 import io.realm.Realm;
 
 
@@ -10,12 +12,31 @@ import io.realm.Realm;
 
 public class DriveNote extends Application {
 
+    private static DriveNote sInstance;
+
+
+    private final String TAG = "DEBUG-APPLICATION";
     @Override
     public void onCreate() {
         super.onCreate();
         Realm.init(this);
 
-
+        sInstance = this;
     }
+
+
+    public static synchronized DriveNote getInstance() {
+        return sInstance;
+    }
+
+    @Override
+    public void onTerminate() {
+        super.onTerminate();
+        /** This Method Called when this Application finished. */
+        Log.v(TAG,"--- onTerminate() in ---");
+    }
+
+
+
 
 }

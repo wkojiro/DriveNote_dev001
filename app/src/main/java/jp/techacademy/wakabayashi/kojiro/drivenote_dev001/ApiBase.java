@@ -32,11 +32,12 @@ public class ApiBase implements SharedPreferences.OnSharedPreferenceChangeListen
 
     protected final Context context;
 
+    private String user_name;
     private String user_token;
     private String user_id;
     private String user_email;
 
-    protected ApiBase(Context context) {
+    public ApiBase(Context context) {
         this.context = context;
     }
 
@@ -158,11 +159,15 @@ public class ApiBase implements SharedPreferences.OnSharedPreferenceChangeListen
         if (user != null) {
             user_id = user.getUid();
             user_token = user.getToken();
-        //  String user_username = user.getUserName();
+            user_name = user.getUserName();
             user_email = user.getEmail();
 
         }
 
+        Utils.setLoggedInUser(context,user_name,user_email,user_token);
+
+
+        /*
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         sp.registerOnSharedPreferenceChangeListener(this);
 
@@ -172,6 +177,7 @@ public class ApiBase implements SharedPreferences.OnSharedPreferenceChangeListen
         editor.putString(Const.TokenKey, user_token);
 
         editor.apply();
+        */
 
         taskresult.setResult("OK");
         //return taskresult.getTask();
@@ -236,21 +242,16 @@ public class ApiBase implements SharedPreferences.OnSharedPreferenceChangeListen
     protected Task<String> deleteUserdata(){
 
         final TaskCompletionSource<String> taskresult = new TaskCompletionSource<>();
+        Utils.removeUserInfo(context);
+        Utils.removeThisDest(context);
 
-        /*
-        .commit() から .apply()に変更。 20170411
-         */
         Realm mRealm = Realm.getDefaultInstance();
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        sp.edit().remove("username").remove("email").remove("access_token").remove("id").remove("position_id").remove("destname").remove("destaddress").remove("destemail").remove("latitude").remove("longitude").apply();
-        //sp.edit().clear().commit();
-        Log.d("debug","Logout:deleteUserdata_done");
-
-
         mRealm.beginTransaction();
         mRealm.deleteAll();
         mRealm.commitTransaction();
         taskresult.setResult("OK");
+        Log.d("debug","Logout:deleteUserdata_done");
+
         return taskresult.getTask();
 
     }
@@ -484,7 +485,7 @@ public class ApiBase implements SharedPreferences.OnSharedPreferenceChangeListen
         return taskresult.getTask();
     }
 
-    protected Task<String>  postMailAsync(String email,String access_token,String destname,String destemail, String nowlatitude, String nowlongitude) {
+    public Task<String>  postMailAsync(String email,String access_token,String destname,String destemail, String nowlatitude, String nowlongitude) {
         final TaskCompletionSource<String> taskresult = new TaskCompletionSource<>();
 
         final MediaType JSON
@@ -517,16 +518,16 @@ public class ApiBase implements SharedPreferences.OnSharedPreferenceChangeListen
         OkHttpClient client = new OkHttpClient();
 
         client.newCall(request).enqueue(new Callback() {
-
-
             @Override
             public void onFailure(Call call, IOException e) {
+                Log.d("debug", "mail_error"+e);
                 taskresult.setError(e);
             }
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 String s = "OK";
+                Log.d("debug","responce"+response);
                 if (response.isSuccessful()){
                     taskresult.setResult(s);
                 }else{
