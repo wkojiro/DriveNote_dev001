@@ -489,7 +489,6 @@ public class LocationUpdatesService extends Service implements GoogleApiClient.C
         destlongitude = Double.parseDouble(Utils.getDestLongitude(getApplicationContext()));
 
      //   if (nowdistance - referencedistance <= 0 && mailCount == 0) {
-
         if(ans <= 0 && mailCount == 0){
 
             Log.d("debug", "メールまでもう少し" +nowdistance);

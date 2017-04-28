@@ -9,6 +9,7 @@
     tools:context="jp.techacademy.wakabayashi.kojiro.drivenote_dev001.MainActivity"
     tools:showIn="@layout/app_bar_main">
 
+
     <FrameLayout
         android:id="@+id/content_frame"
         android:layout_width="match_parent"

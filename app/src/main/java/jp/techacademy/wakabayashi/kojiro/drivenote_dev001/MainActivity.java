@@ -48,6 +48,7 @@ import java.util.Calendar;
 
 import bolts.Continuation;
 import bolts.Task;
+import jp.techacademy.wakabayashi.kojiro.drivenote_dev001.fragments.BottomSheetFragment;
 import jp.techacademy.wakabayashi.kojiro.drivenote_dev001.fragments.GmapFragment;
 
 
@@ -128,6 +129,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
         */
 
+        Button btnBottomSheetBehavior = (Button)findViewById(R.id.bottomsheet) ;
+        btnBottomSheetBehavior.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                showBottomSheetFragment();
+            }
+        });
+
+
         //memo: Login時に保存したユーザーデータを取得
         sp = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         sp.registerOnSharedPreferenceChangeListener(this);
@@ -173,61 +184,58 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         int id = item.getItemId();
 
-        if (id == R.id.nav_hobby) {
+        if (id == R.id.nav_home) {
             // Handle the camera action
             // fm.beginTransaction().replace(R.id, new ImportFragment()).commit();
-        } else if (id == R.id.nav_life) {
+        } else if (id == R.id.nav_dest) {
 
-        } else if (id == R.id.nav_health) {
+            Intent intent = new Intent(getApplicationContext(), SettingActivity.class);
+            startActivity(intent);
 
-        } else if (id == R.id.nav_compter) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
+        } else if (id == R.id.nav_note) {
 
         } else if (id == R.id.logout){
 
-            new ApiBase(MainActivity.this).logoutAsync().onSuccessTask(new Continuation<String, Task<String>>(){
-                @Override
-                public Task<String> then(Task<String> task) throws Exception {
+            if(!Utils.isEmptyUser(getApplicationContext())) {
+                new ApiBase(MainActivity.this).logoutAsync().onSuccessTask(new Continuation<String, Task<String>>() {
+                    @Override
+                    public Task<String> then(Task<String> task) throws Exception {
 
 
-                    return new ApiBase(MainActivity.this).deleteUserdata();
-                }
-
-            }).onSuccess(new Continuation<String, String>(){
-                @Override
-                public String then(Task<String> task) throws Exception {
-
-                    Toast.makeText(MainActivity.this,"ログアウトしました。",Toast.LENGTH_SHORT).show();
-                    Toast.makeText(MainActivity.this,String.valueOf(Utils.isEmptyUser(MainActivity.this)),Toast.LENGTH_SHORT).show();
-                    Toast.makeText(MainActivity.this,String.valueOf(Utils.isEmptyDest(MainActivity.this)),Toast.LENGTH_SHORT).show();
-                  //  Utils.isEmptyDest(MainActivity.this);
-                    //finish();
-                    return null;
-                }
-            }, Task.UI_THREAD_EXECUTOR).continueWith(new Continuation<String, String>() {
-                @Override
-                public String then(Task<String> task) throws Exception {
-                    Log.d("Thread","LoginActLoginContinuewwith"+Thread.currentThread().getName());
-
-                    //finish();
-
-                    if (task.isFaulted()) {
-                        Exception e = task.getError();
-
-                        Log.d("debug2",e.toString());
-                        Log.e("hoge","error", e);
-                        //エラー処理
-
-                        Toast.makeText(MainActivity.this,"ログアウトに失敗しました。",Toast.LENGTH_SHORT).show();
+                        return new ApiBase(MainActivity.this).deleteUserdata();
                     }
-                    return null;
-                }
-            }, Task.UI_THREAD_EXECUTOR);
 
+                }).onSuccess(new Continuation<String, String>() {
+                    @Override
+                    public String then(Task<String> task) throws Exception {
 
+                        Toast.makeText(MainActivity.this, "ログアウトしました。", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this, String.valueOf(Utils.isEmptyUser(MainActivity.this)), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this, String.valueOf(Utils.isEmptyDest(MainActivity.this)), Toast.LENGTH_SHORT).show();
+                        //  Utils.isEmptyDest(MainActivity.this);
+                        //finish();
+                        return null;
+                    }
+                }, Task.UI_THREAD_EXECUTOR).continueWith(new Continuation<String, String>() {
+                    @Override
+                    public String then(Task<String> task) throws Exception {
+                        Log.d("Thread", "LoginActLoginContinuewwith" + Thread.currentThread().getName());
+
+                        //finish();
+
+                        if (task.isFaulted()) {
+                            Exception e = task.getError();
+
+                            Log.d("debug2", e.toString());
+                            Log.e("hoge", "error", e);
+                            //エラー処理
+
+                            Toast.makeText(MainActivity.this, "ログアウトに失敗しました。", Toast.LENGTH_SHORT).show();
+                        }
+                        return null;
+                    }
+                }, Task.UI_THREAD_EXECUTOR);
+            }
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -268,6 +276,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     }
 
+
+    private void showBottomSheetFragment(){
+
+        BottomSheetFragment fragmentModalBottomSheet = new BottomSheetFragment();
+        fragmentModalBottomSheet.show(getSupportFragmentManager(),"BottomSheet Fragment");
+    }
 
 
     /***** go to fragment

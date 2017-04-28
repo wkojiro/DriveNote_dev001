@@ -8,37 +8,38 @@
     android:fitsSystemWindows="true"
     tools:context="jp.techacademy.wakabayashi.kojiro.drivenote_dev001.MainActivity">
 
+
     <android.support.design.widget.AppBarLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:theme="@style/AppTheme.AppBarOverlay">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:theme="@style/AppTheme.AppBarOverlay">
-
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            app:popupTheme="@style/AppTheme.PopupOverlay" />
-
-    </android.support.design.widget.AppBarLayout>
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        app:titleTextColor="@color/colorWhite"
+        app:subtitleTextColor="@color/colorlightGray"
+        app:popupTheme="@style/AppTheme.PopupOverlay" />
 
 
-    <include layout="@layout/content_main" />
+</android.support.design.widget.AppBarLayout>
 
+    <include layout="@layout/content_main"
+             android:id="@+id/include2"/>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
-
-
         android:orientation="vertical">
 
     <TextView
         android:id="@+id/textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
-
+<!--
     <Button
         android:id="@+id/request_location_updates_button"
         android:layout_width="match_parent"
@@ -50,15 +51,64 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/remove_location_updates" />
+
+        -->
     </LinearLayout>
 
     <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab"
+        android:id="@+id/fab_stop"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
+        android:layout_gravity="top|end"
         android:layout_margin="@dimen/fab_margin"
-        android:src="@drawable/plus" />
+        android:layout_marginBottom="@dimen/fab_margin"
+        android:src="@drawable/ic_action_stop"
+        app:backgroundTint="@color/colorWhite"
+        app:layout_anchor="@+id/fab_invisible2"
+        app:layout_anchorGravity="top|end"/>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab_invisible"
+        android:layout_width="@dimen/fab_margin"
+        android:layout_height="@dimen/fab_margin"
+        android:layout_gravity="top|end"
+        android:layout_margin="@dimen/fab_margin"
+        android:visibility="invisible"
+        app:layout_anchor="@id/fab_stop"
+        app:layout_anchorGravity="top" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab_start"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|end"
+        android:layout_margin="@dimen/fab_margin"
+        android:src="@drawable/ic_action_start"
+        app:backgroundTint="@color/colorlightseagreen"
+        app:layout_anchor="@id/fab_invisible"
+        app:layout_anchorGravity="top" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab_invisible2"
+        android:layout_width="@dimen/fab_margin"
+        android:layout_height="@dimen/fab_margin"
+        android:layout_gravity="top|end"
+        android:layout_margin="@dimen/fab_margin"
+        android:visibility="invisible"
+        app:layout_anchor="@+id/bottomsheet"
+        app:layout_anchorGravity="top|end" />
+
+
+
+    <Button
+        android:id="@+id/bottomsheet"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_gravity="bottom"
+        android:background="@android:color/white"
+        android:text="BottomSheet"
+        android:textAlignment="center"
+        android:textSize="15sp"/>
 
 
 

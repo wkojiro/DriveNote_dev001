@@ -12,6 +12,7 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
@@ -88,8 +89,11 @@ public class GmapFragment extends Fragment implements SharedPreferences.OnShared
     GoogleMap mMap = null;
 
     // UI elements.
-    private Button mRequestLocationUpdatesButton;
-    private Button mRemoveLocationUpdatesButton;
+    //private Button mRequestLocationUpdatesButton;
+    //private Button mRemoveLocationUpdatesButton;
+
+    private FloatingActionButton mRequestLocationUpdatesButton;
+    private FloatingActionButton mRemoveLocationUpdatesButton;
 
     String destname;
     Double destlatitude, destlongitude;
@@ -140,13 +144,17 @@ public class GmapFragment extends Fragment implements SharedPreferences.OnShared
     };
 
 
-    private void resetState(){
+    private void resetState() {
         // onGoingをとめる
-        Utils.setOnGoing(getActivity(), false);
+        if (Utils.onGoing(getActivity())){
+            Utils.setOnGoing(getActivity(), false);
+         }
         //setUIState(Utils.requestingLocationUpdates(MainActivity.this));
 
         // 目的地を削除する
-        Utils.removeThisDest(getActivity());
+        if(!Utils.isEmptyDest(getActivity())) {
+            Utils.removeThisDest(getActivity());
+        }
     }
 
     @Override
@@ -201,9 +209,11 @@ public class GmapFragment extends Fragment implements SharedPreferences.OnShared
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         Log.d("Fragment", "MapFragment onCreateView");
-
-        // public View inflate (int resource, ViewGroup root, boolean attachToRoot)
         return inflater.inflate(R.layout.fragment_map, container, false);
+        // public View inflate (int resource, ViewGroup root, boolean attachToRoot)
+
+
+
     }
 
     @Override
@@ -221,8 +231,10 @@ public class GmapFragment extends Fragment implements SharedPreferences.OnShared
         super.onStart();
         Toast.makeText(getActivity(), "OnStart", Toast.LENGTH_SHORT).show();
 
-        mRequestLocationUpdatesButton = (Button) getActivity().findViewById(R.id.request_location_updates_button);
-        mRemoveLocationUpdatesButton = (Button) getActivity().findViewById(R.id.remove_location_updates_button);
+        mRequestLocationUpdatesButton = (FloatingActionButton) getActivity().findViewById(R.id.fab_start);
+
+        //mRequestLocationUpdatesButton = (Button) getActivity().findViewById(R.id.request_location_updates_button);
+        mRemoveLocationUpdatesButton = (FloatingActionButton) getActivity().findViewById(R.id.fab_stop);
 
         mRequestLocationUpdatesButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -237,6 +249,12 @@ public class GmapFragment extends Fragment implements SharedPreferences.OnShared
                         mService.requestLocationUpdates();
 
                         if (Utils.isEmptyDest(getActivity())) {
+
+
+
+
+
+
                             Intent intent = new Intent(getActivity(), SettingActivity.class);
                             startActivity(intent);
                             //ここでFirstMapが呼ばれる（PermissionOK, UserOK, APIOK, DestOK, onGoingNG)
@@ -504,17 +522,17 @@ public class GmapFragment extends Fragment implements SharedPreferences.OnShared
             if (Utils.isEmptyUser(getActivity())) {
                 //一度クリックしてRequestでた後に、戻るボタンなどで登録せずに戻ってきた状態。）
                 mRequestLocationUpdatesButton.setEnabled(true);
-                mRequestLocationUpdatesButton.setText("ユーザー登録");
+                //mRequestLocationUpdatesButton.setText("ユーザー登録");
                 mRemoveLocationUpdatesButton.setEnabled(false);
             } else if (Utils.isEmptyDest(getActivity())) {
                 //ユーザー登録後の流れとして、このButtonとなる。リセット後はRequestも削除されるのでここにはこない。
                 mRequestLocationUpdatesButton.setEnabled(true);
-                mRequestLocationUpdatesButton.setText("目的地登録");
+                //mRequestLocationUpdatesButton.setText("目的地登録");
                 mRemoveLocationUpdatesButton.setEnabled(false);
             } else if (!onGoing) {
                 //出発！
                 mRequestLocationUpdatesButton.setEnabled(true);
-                mRequestLocationUpdatesButton.setText("出発");
+                //mRequestLocationUpdatesButton.setText("出発");
                 mRemoveLocationUpdatesButton.setEnabled(true);
                 //FirstMap()
                 Toast.makeText(getActivity().getApplicationContext(), "目的地をセットしました", Toast.LENGTH_SHORT).show();
@@ -523,7 +541,7 @@ public class GmapFragment extends Fragment implements SharedPreferences.OnShared
                 //ActiveMap()
                 Toast.makeText(getActivity().getApplicationContext(), "計測開始しました！", Toast.LENGTH_SHORT).show();
                 mRequestLocationUpdatesButton.setEnabled(false);
-                mRequestLocationUpdatesButton.setText("計測中");
+                //mRequestLocationUpdatesButton.setText("計測中");
                 mRemoveLocationUpdatesButton.setEnabled(true);
             }
             //リセットボタン押したあと.requestingLocationUpdateも削除するため。
@@ -531,20 +549,21 @@ public class GmapFragment extends Fragment implements SharedPreferences.OnShared
             if (Utils.isEmptyUser(getActivity())) {
                 //
                 mRequestLocationUpdatesButton.setEnabled(true);
-                mRequestLocationUpdatesButton.setText("ユーザー登録");
+                //mRequestLocationUpdatesButton.setText("ユーザー登録");
                 mRemoveLocationUpdatesButton.setEnabled(false);
+                mRemoveLocationUpdatesButton.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorGray)));
 
             } else if (Utils.isEmptyDest(getActivity())) {
 
                 //リセット後はここにくる。
                 mRequestLocationUpdatesButton.setEnabled(true);
-                mRequestLocationUpdatesButton.setText("目的地登録");
+                //mRequestLocationUpdatesButton.setText("目的地登録");
                 mRemoveLocationUpdatesButton.setEnabled(false);
 
             } else {
                 //
                 mRequestLocationUpdatesButton.setEnabled(true);
-                mRequestLocationUpdatesButton.setText("目的地を設定");
+                //mRequestLocationUpdatesButton.setText("目的地を設定");
                 mRemoveLocationUpdatesButton.setEnabled(false);
             }
         }
@@ -640,7 +659,7 @@ public class GmapFragment extends Fragment implements SharedPreferences.OnShared
         builder.include(destmarker.getPosition());
         builder.include(currentMarker.getPosition());
         LatLngBounds bounds = builder.build();
-        mMap.setPadding(50, 250, 50, 250); //   left,        top,       right,  bottom
+        mMap.setPadding(50, 150, 50, 200); //   left,        top,       right,  bottom
         CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, 120);
 
         mMap.moveCamera(cu);
@@ -655,7 +674,7 @@ public class GmapFragment extends Fragment implements SharedPreferences.OnShared
 
         // 設定の取得
         UiSettings settings = mMap.getUiSettings();
-        settings.setZoomControlsEnabled(true);
+       // settings.setZoomControlsEnabled(true);
 
        // currentlatitude = mCurrentLocation.getLatitude();
        // currentlongitude = mCurrentLocation.getLongitude();
