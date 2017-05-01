@@ -44,6 +44,8 @@
 
     </style>
 
+
+    <!--http://qiita.com/wrbss/items/630697342bc70dfcda69 -->
     <style name="MyMaterialTheme.Base" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="windowNoTitle">true</item>
         <item name="windowActionBar">false</item>

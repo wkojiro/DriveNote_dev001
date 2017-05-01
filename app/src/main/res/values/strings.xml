@@ -32,7 +32,9 @@
         completions."
     </string>
 
-
+    <string name="signin">ログイン</string>
+    <string name="signout">ログアウト</string>
+    <string name="destinationsetting">目的地設定</string>
     <string name="title_activity_dest_list">DestListActivity</string>
     <string name="title_activity_setting">SettingActivity</string>
     <string name="action_settings">SettingActivity</string>

@@ -13,6 +13,8 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
@@ -22,6 +24,7 @@ import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.LocalBroadcastManager;
@@ -32,6 +35,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -95,12 +99,20 @@ public class GmapFragment extends Fragment implements SharedPreferences.OnShared
     private FloatingActionButton mRequestLocationUpdatesButton;
     private FloatingActionButton mRemoveLocationUpdatesButton;
 
+
+
     String destname;
     Double destlatitude, destlongitude;
 
     private LatLng latlng;
 
     private static TextView mTextView;
+    private static String red = "#F44336";
+    private static String blue = "#2196F3";
+    private static String yellow = "#FFEB3B";
+    private static ImageView mSignalView01, mSignalView02, mSignalView03;
+
+    private static NavigationView navigationView;
 
     Marker destmarker;
     Marker currentMarker;
@@ -123,6 +135,8 @@ public class GmapFragment extends Fragment implements SharedPreferences.OnShared
 
     // Preference elements
     SharedPreferences sp;
+
+
 
     // Monitors the state of the connection to the service.
     private final ServiceConnection mServiceConnection = new ServiceConnection() {
@@ -170,9 +184,14 @@ public class GmapFragment extends Fragment implements SharedPreferences.OnShared
 
         mTextView = (TextView) getActivity().findViewById(R.id.textView);
 
-        // Check that the user hasn't revoked permissions by going to Settings.
+        mSignalView01 = (ImageView) getActivity().findViewById(R.id.Signal01);
+
+        navigationView = (NavigationView) getActivity().findViewById(R.id.nav_view);
+
+        // パーミッションがなければ取得に動く。Check that the user hasn't revoked permissions by going to Settings.
         if (Utils.requestingLocationUpdates(getActivity())) {
             if (!checkPermissions()) {
+                Log.d("debug","Fragment_onCreate_requestPermissions");
                 requestPermissions();
             }
         }
@@ -230,6 +249,8 @@ public class GmapFragment extends Fragment implements SharedPreferences.OnShared
     public void onStart() {
         super.onStart();
         Toast.makeText(getActivity(), "OnStart", Toast.LENGTH_SHORT).show();
+
+
 
         mRequestLocationUpdatesButton = (FloatingActionButton) getActivity().findViewById(R.id.fab_start);
 
@@ -305,7 +326,7 @@ public class GmapFragment extends Fragment implements SharedPreferences.OnShared
             @Override
             public void onClick(View view) {
                 // 1.Serviceをとめる（＝APIを止める）
-                mService.removeLocationUpdates();
+               // mService.removeLocationUpdates();
                 // 2.onGoingをとめる
                 Utils.setOnGoing(getActivity(), false);
                 //setUIState(Utils.requestingLocationUpdates(MainActivity.this));
@@ -364,7 +385,7 @@ public class GmapFragment extends Fragment implements SharedPreferences.OnShared
         //memo: ここのFalseはあくまでもDefault値なので、結果では無い。
         Log.d("debug","MapFragment: PreferenceChanged");
         if (s.equals(Utils.LocationUpDateKEY)) {
-           // setUIState(sp.getBoolean(Const.LocationUpDateKEY, false), sp.getBoolean(Const.OngoingKEY, false));
+         //  setUIState(sp.getBoolean(Utils.LocationUpDateKEY, false), sp.getBoolean(Utils.OngoingKEY, false));
             Log.d("debug", "1:LocationUpdate,OnGoingCondition:" + sp.getBoolean(Utils.OngoingKEY, false) + sp.getBoolean(Utils.LocationUpDateKEY, false));
         }
         if (s.equals(Utils.OngoingKEY)) {
@@ -399,6 +420,8 @@ public class GmapFragment extends Fragment implements SharedPreferences.OnShared
         if (Utils.isEmptyUser(getActivity())) {
             Utils.setOnGoing(getActivity(), false);
             setUIState(sp.getBoolean(Utils.LocationUpDateKEY, false), sp.getBoolean(Utils.OngoingKEY, false));
+
+
             Log.d("debug", "3:LocationUpdate,OnGoingCondition:" + sp.getBoolean(Utils.OngoingKEY, false) + sp.getBoolean(Utils.LocationUpDateKEY, false));
         }
 
@@ -523,16 +546,23 @@ public class GmapFragment extends Fragment implements SharedPreferences.OnShared
                 //一度クリックしてRequestでた後に、戻るボタンなどで登録せずに戻ってきた状態。）
                 mRequestLocationUpdatesButton.setEnabled(true);
                 //mRequestLocationUpdatesButton.setText("ユーザー登録");
+                mSignalView01.setColorFilter(Color.parseColor(yellow), PorterDuff.Mode.SRC_IN);
+
+
                 mRemoveLocationUpdatesButton.setEnabled(false);
             } else if (Utils.isEmptyDest(getActivity())) {
                 //ユーザー登録後の流れとして、このButtonとなる。リセット後はRequestも削除されるのでここにはこない。
                 mRequestLocationUpdatesButton.setEnabled(true);
                 //mRequestLocationUpdatesButton.setText("目的地登録");
+                mSignalView01.setColorFilter(Color.parseColor(yellow), PorterDuff.Mode.SRC_IN);
+
                 mRemoveLocationUpdatesButton.setEnabled(false);
             } else if (!onGoing) {
                 //出発！
                 mRequestLocationUpdatesButton.setEnabled(true);
                 //mRequestLocationUpdatesButton.setText("出発");
+                mSignalView01.setColorFilter(Color.parseColor(blue), PorterDuff.Mode.SRC_IN);
+
                 mRemoveLocationUpdatesButton.setEnabled(true);
                 //FirstMap()
                 Toast.makeText(getActivity().getApplicationContext(), "目的地をセットしました", Toast.LENGTH_SHORT).show();
@@ -541,32 +571,41 @@ public class GmapFragment extends Fragment implements SharedPreferences.OnShared
                 //ActiveMap()
                 Toast.makeText(getActivity().getApplicationContext(), "計測開始しました！", Toast.LENGTH_SHORT).show();
                 mRequestLocationUpdatesButton.setEnabled(false);
+                mSignalView01.setColorFilter(Color.parseColor(red), PorterDuff.Mode.SRC_IN);
                 //mRequestLocationUpdatesButton.setText("計測中");
                 mRemoveLocationUpdatesButton.setEnabled(true);
             }
             //リセットボタン押したあと.requestingLocationUpdateも削除するため。
         } else {
             if (Utils.isEmptyUser(getActivity())) {
-                //
+
                 mRequestLocationUpdatesButton.setEnabled(true);
                 //mRequestLocationUpdatesButton.setText("ユーザー登録");
+
                 mRemoveLocationUpdatesButton.setEnabled(false);
                 mRemoveLocationUpdatesButton.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorGray)));
 
             } else if (Utils.isEmptyDest(getActivity())) {
 
+
                 //リセット後はここにくる。
                 mRequestLocationUpdatesButton.setEnabled(true);
                 //mRequestLocationUpdatesButton.setText("目的地登録");
+
+
                 mRemoveLocationUpdatesButton.setEnabled(false);
 
             } else {
                 //
+
                 mRequestLocationUpdatesButton.setEnabled(true);
                 //mRequestLocationUpdatesButton.setText("目的地を設定");
+
                 mRemoveLocationUpdatesButton.setEnabled(false);
             }
         }
+
+
     }
 
     @Override

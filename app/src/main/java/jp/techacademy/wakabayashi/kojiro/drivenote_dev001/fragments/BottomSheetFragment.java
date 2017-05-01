@@ -81,6 +81,17 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
 
     }
 
+
+    private void showOrHideBottomSheet(boolean show) {
+        if (show) {
+            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+            bottomSheetBehavior.setHideable(false);
+        } else {
+            bottomSheetBehavior.setHideable(true);
+            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+        }
+    }
+
     @Override
     public void setupDialog(Dialog dialog, int style) {
         super.setupDialog(dialog, style);
