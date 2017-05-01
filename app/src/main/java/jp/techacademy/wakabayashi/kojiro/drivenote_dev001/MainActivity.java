@@ -81,11 +81,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     // UI elements.
     private Button mRequestLocationUpdatesButton;
     private Button mRemoveLocationUpdatesButton;
-    private TextView mTextView;
-    private ImageView mSignalView01, mSignalView02, mSignalView03;
+    private TextView mTextView,mEmailTextView,mUsernameTextView;
+    private ImageView mSignalView01, mSignalView02, mSignalView03,mUserImageView;
     private AppBarLayout mBarLayout,mBarLayout2;
     private Toolbar mToolbar,mToolbar2;
     private NavigationView navigationView;
+
+    private Button mBottomSheetButton;
     private BottomSheetBehavior behavior;
 
     String red = "#F44336";
@@ -107,10 +109,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mBarLayout = (AppBarLayout) findViewById(R.id.appbar);
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
 
+        Log.d("debug","user"+Utils.getLoggedInUserEmail(getApplicationContext()));
+
+      //   mEmailTextView.setText(Utils.getLoggedInUserEmail(MainActivity.this));
+      //  mUsernameTextView.setText(Utils.getLoggedInUserName(getApplication()));
+
 //memo: 何故INVISIBLEが機能しないか。
 
         mBarLayout2 = (AppBarLayout) findViewById(R.id.appbar2);
         mToolbar2 = (Toolbar) findViewById(R.id.toolbar2);
+
+        //memo:到着フラグの設定
+        Utils.setArrivalkey(getApplicationContext(), false);
 
         setupToolbar();
         setupBottomSheetBehavior();
@@ -130,6 +140,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        View header=navigationView.getHeaderView(0);
+/*View view=navigationView.inflateHeaderView(R.layout.nav_header_main);*/
+
+        mUsernameTextView = (TextView)header.findViewById(R.id.usernameTextView);
+        mEmailTextView = (TextView)header.findViewById(R.id.emailtextView);
+        mUsernameTextView.setText(Utils.getLoggedInUserName(getApplicationContext()));
+
+        Log.d("debug","email"+Utils.getLoggedInUserEmail(getApplicationContext()));
+        mEmailTextView.setText(Utils.getLoggedInUserEmail(getApplicationContext()));
 
         if(Utils.isEmptyUser(getApplicationContext())){
             navigationView.getMenu().findItem(R.id.login).setVisible(true);
@@ -153,8 +173,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         fm.beginTransaction().replace(R.id.content_frame, new GmapFragment()).commit();
         Log.d("Activity","onCreate");
 
+        mBottomSheetButton = (Button)findViewById(R.id.bottomsheet);
 
-        findViewById(R.id.bottomsheet).setOnClickListener(new View.OnClickListener() {
+        mBottomSheetButton.setText("目的地を設定");
+
+
+        mBottomSheetButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (!behavior.isHideable()) {
@@ -184,6 +208,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
+
 
         FragmentManager fm = getFragmentManager();
         int id = item.getItemId();
@@ -368,7 +393,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if(Utils.isEmptyUser(getApplicationContext())){
             navigationView.getMenu().findItem(R.id.login).setVisible(true);
             navigationView.getMenu().findItem(R.id.logout).setVisible(false);
+            mEmailTextView.setText("");
+            mUsernameTextView.setText("");
         } else {
+            mEmailTextView.setText(Utils.getLoggedInUserEmail(getApplicationContext()));
+            mUsernameTextView.setText(Utils.getLoggedInUserName(getApplicationContext()));
             navigationView.getMenu().findItem(R.id.login).setVisible(false);
             navigationView.getMenu().findItem(R.id.logout).setVisible(true);
         }

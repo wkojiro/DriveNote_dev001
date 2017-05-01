@@ -1,5 +1,7 @@
 package jp.techacademy.wakabayashi.kojiro.drivenote_dev001;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -7,8 +9,10 @@ import android.content.SharedPreferences.Editor;
 import android.location.Location;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.text.DateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 
@@ -36,6 +40,7 @@ public class Utils {
     public static final String ODISTANCEKEY = "originaldistance";
     public static final String OngoingKEY = "ongoing";
     public static final String LoginKEY = "login";
+    public static final String ArrivalKEY = "arrived";
 
 
 
@@ -232,6 +237,19 @@ public class Utils {
     }
 
 
+
+    public static void setArrivalkey(Context context, Boolean arrival ){
+        PreferenceManager.getDefaultSharedPreferences(context)
+                .edit()
+                .putBoolean(ArrivalKEY, arrival)
+                .apply();
+
+
+    }
+
+    public static boolean getArrival(Context context){
+        return PreferenceManager.getDefaultSharedPreferences(context).getBoolean(ArrivalKEY,false);
+    }
     /**
      * Returns the {@code location} object as a human readable string.
      * @param location  The {@link Location}.
@@ -246,15 +264,21 @@ public class Utils {
                 DateFormat.getDateTimeInstance().format(new Date()));
     }
 
-    static void resetApp() {
+    static void resetApp(Context context) {
 
         //service を止める
         //Destinationを削除する
+        Intent intent = new Intent(context, LocationUpdatesService.class);
+        context.stopService(intent);
+        setRequestingLocationUpdates(context,false);
+        removeThisDest(context);
+        setArrivalkey(context, true);
 
-        setRequestingLocationUpdates(null,false);
-        removeThisDest(null);
+        Toast.makeText(context,"リセットしました。",Toast.LENGTH_SHORT).show();
         Log.d("debug","resetApp");
 
     }
+
+
 }
 

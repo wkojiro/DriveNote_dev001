@@ -128,6 +128,7 @@ public class LocationUpdatesService extends Service implements GoogleApiClient.C
     Float nowdistance;
 
     Integer mailCount = 0;
+    Integer arraivalCount = 0;
 
     protected Location mCurrentLocation;
     protected LatLng currentlatlng;
@@ -342,6 +343,7 @@ public class LocationUpdatesService extends Service implements GoogleApiClient.C
             if(Utils.onGoing(getApplicationContext())){
                 postMyPosition(distance);
             }
+
             intent.putExtra(EXTRA_DESTANCE, distance);
         }
         intent.putExtra(EXTRA_LOCATION, location);
@@ -521,12 +523,21 @@ public class LocationUpdatesService extends Service implements GoogleApiClient.C
 
         }
 
-        if (nowdistance <= 0.08) {
-
+        if (nowdistance <= 0.08 ) {
             Toast.makeText(getApplicationContext(), "お疲れ様でした。到着しました。", Toast.LENGTH_LONG).show();
-
+            if(!Utils.getArrival(getApplicationContext())) {
+                final Handler handler = new Handler();
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        Utils.resetApp(getApplicationContext());
+                    }
+                }, 10000);
+            }
         }
     }
+
+
 
 
 
