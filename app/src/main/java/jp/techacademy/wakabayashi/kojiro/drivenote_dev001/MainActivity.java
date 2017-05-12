@@ -79,8 +79,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
   //  private boolean mBound = false;
 
     // UI elements.
-    private Button mRequestLocationUpdatesButton;
-    private Button mRemoveLocationUpdatesButton;
+ //   private Button mRequestLocationUpdatesButton;
+ //   private Button mRemoveLocationUpdatesButton;
+
+    private FloatingActionButton mRequestLocationUpdatesButton;
+    private FloatingActionButton mRemoveLocationUpdatesButton;
     private TextView mTextView,mEmailTextView,mUsernameTextView;
     private ImageView mSignalView01, mSignalView02, mSignalView03,mUserImageView;
     private AppBarLayout mBarLayout,mBarLayout2;
@@ -132,6 +135,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         sp.registerOnSharedPreferenceChangeListener(this);
 
 
+        mRequestLocationUpdatesButton = (FloatingActionButton)findViewById(R.id.fab_start);
+
         // ナビゲーションドロワーの設定
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, mToolbar, R.string.app_name, R.string.app_name);
@@ -165,7 +170,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // mSignalView03 = (ImageView) getActivity().findViewById(R.id.Signal03);
 
         mTextView = (TextView) findViewById(R.id.textView);
-        mTextView.setText("ddd");
+      //  mTextView.setText("ddd");
 
 
         FragmentManager fm = getFragmentManager();
@@ -174,9 +179,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Log.d("Activity","onCreate");
 
         mBottomSheetButton = (Button)findViewById(R.id.bottomsheet);
-
         mBottomSheetButton.setText("目的地を設定");
-
 
         mBottomSheetButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -199,17 +202,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onStart();
         Log.d("debug","bottomSheet Activity OnStart"+behavior.isHideable());
 
-       // mBarLayout2.setVisibility(View.INVISIBLE);
-       // mToolbar2.setVisibility(View.INVISIBLE);
-
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
-
-
         FragmentManager fm = getFragmentManager();
         int id = item.getItemId();
         if (id == R.id.nav_home) {
@@ -221,10 +219,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } else if (id == R.id.nav_note) {
 
         } else if (id == R.id.login){
-
             Intent intent = new Intent(getApplicationContext(),LoginActivity.class);
             startActivity(intent);
-
 
         } else if (id == R.id.logout){
 
@@ -302,10 +298,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public void onStateChanged(@NonNull View bottomSheet, int newState) {
                 // React to state change
+
                 if (newState == BottomSheetBehavior.STATE_DRAGGING) {
+
                     behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
                 }
                 if (newState == BottomSheetBehavior.STATE_EXPANDED) {
+                    //Collapseは本当はButtonのみに反応させたい。地図が動いてしまうので。
                     behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
                 }
 
@@ -342,8 +341,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void setupToolbar(){
         // ツールバーをアクションバーとしてセット
-
-
         mBarLayout.setVisibility(View.VISIBLE);
         mToolbar.setVisibility(View.VISIBLE);
         mToolbar2.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
@@ -412,11 +409,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
 
+        int id = item.getItemId();
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
 

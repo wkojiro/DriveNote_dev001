@@ -50,6 +50,8 @@
     <include layout="@layout/content_main"
                  android:id="@+id/include2"/>
 
+
+    <!--
     <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -84,7 +86,7 @@
                 android:id="@+id/textView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
-        <!--
+
             <Button
                 android:id="@+id/request_location_updates_button"
                 android:layout_width="match_parent"
@@ -97,8 +99,8 @@
                 android:layout_height="wrap_content"
                 android:text="@string/remove_location_updates" />
 
-      -->
-    </LinearLayout>
+
+    </LinearLayout>-->
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab_stop"

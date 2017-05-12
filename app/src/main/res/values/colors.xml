@@ -22,5 +22,9 @@
 
     <color name="colorblack">#000000</color>
 
+    <color name="colorBrightRed">#ff0103</color>
+    <color name="colorBrightYellow">#FFFF00</color>
+    <color name="colorBrightBlue">#33FFCC</color>
+
 
 </resources>

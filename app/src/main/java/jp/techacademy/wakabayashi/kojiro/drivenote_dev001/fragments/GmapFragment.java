@@ -106,11 +106,12 @@ public class GmapFragment extends Fragment implements SharedPreferences.OnShared
 
     private LatLng latlng;
 
-    private static TextView mTextView;
-    private static String red = "#F44336";
-    private static String blue = "#2196F3";
-    private static String yellow = "#FFEB3B";
-    private static ImageView mSignalView01, mSignalView02, mSignalView03;
+    private TextView mTextView;
+
+    private String red = "#ff0103";
+    private String blue = "#33FFCC";
+    private String yellow = "#FFFF00";
+    private ImageView mSignalView01, mSignalView02, mSignalView03;
 
     private static NavigationView navigationView;
 
@@ -182,11 +183,6 @@ public class GmapFragment extends Fragment implements SharedPreferences.OnShared
 
         resetState();
 
-        mTextView = (TextView) getActivity().findViewById(R.id.textView);
-
-        mSignalView01 = (ImageView) getActivity().findViewById(R.id.Signal01);
-
-        navigationView = (NavigationView) getActivity().findViewById(R.id.nav_view);
 
         // パーミッションがなければ取得に動く。Check that the user hasn't revoked permissions by going to Settings.
         if (Utils.requestingLocationUpdates(getActivity())) {
@@ -245,12 +241,15 @@ public class GmapFragment extends Fragment implements SharedPreferences.OnShared
     }
 
 
+    //memo: FragmentのUIの宣言はonStartの方が良さそう？
     @Override
     public void onStart() {
         super.onStart();
         Toast.makeText(getActivity(), "OnStart", Toast.LENGTH_SHORT).show();
 
-
+        mTextView = (TextView) getActivity().findViewById(R.id.textView);
+        mSignalView01 = (ImageView) getActivity().findViewById(R.id.Signal01);
+        navigationView = (NavigationView) getActivity().findViewById(R.id.nav_view);
 
         mRequestLocationUpdatesButton = (FloatingActionButton) getActivity().findViewById(R.id.fab_start);
 
@@ -586,35 +585,25 @@ public class GmapFragment extends Fragment implements SharedPreferences.OnShared
                 mRemoveLocationUpdatesButton.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorGray)));
 
             } else if (Utils.isEmptyDest(getActivity())) {
-
-
                 //リセット後はここにくる。
                 mRequestLocationUpdatesButton.setEnabled(true);
                 //mRequestLocationUpdatesButton.setText("目的地登録");
-
-
                 mRemoveLocationUpdatesButton.setEnabled(false);
 
             } else {
                 //
-
                 mRequestLocationUpdatesButton.setEnabled(true);
                 //mRequestLocationUpdatesButton.setText("目的地を設定");
-
                 mRemoveLocationUpdatesButton.setEnabled(false);
             }
         }
-
-
     }
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
         Log.d("onMapReady", "when do you call me?");
         mMap = googleMap;
-
         defaultMap();
-
     }
 
     private void defaultMap() {
@@ -700,7 +689,6 @@ public class GmapFragment extends Fragment implements SharedPreferences.OnShared
         LatLngBounds bounds = builder.build();
         mMap.setPadding(50, 150, 50, 200); //   left,        top,       right,  bottom
         CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, 120);
-
         mMap.moveCamera(cu);
     }
 
