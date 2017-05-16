@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.location.Location;
 import android.preference.PreferenceManager;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -27,21 +28,22 @@ public class Utils {
     // static final => クラス定数（再代入できない）何故これを定義するのか、よく分からない。
     public static final String LocationUpDateKEY = "locaction_updates";
     public static final String UidKEY = "id";
-    public static final String UnameKEY = "username"; //Preferenceにusernameを保存する時のキー
+    public static final String UnameKEY = "membername"; //Preferenceにusernameを保存する時のキー
     public static final String EmailKEY = "email"; // PreferenceにEmailを保存する時のキー
-    public static final String TokenKey = "access_token"; // PreferenceにTokenを保存する時のキー
+    public static final String TokenKEY = "access_token"; // PreferenceにTokenを保存する時のキー
     public static final String RailsKEY = "id";// PreferenceにDestのIDを保存する時のキー
-    public static final String PositionKey = "position_id";
+    public static final String BranchidKEY = "branch_id";
     public static final String DestnameKEY = "destname";
     public static final String DestemailKEY = "destemail";
     public static final String DestaddressKEY = "destaddress";
     public static final String DestLatitudeKEY = "latitude";
     public static final String DestLongitudeKEY = "longitude";
-    public static final String ODISTANCEKEY = "originaldistance";
     public static final String OngoingKEY = "ongoing";
     public static final String LoginKEY = "login";
     public static final String ArrivalKEY = "arrived";
 
+    public static final String DriveNoteIDKEY = "drivenote_id";
+    public static final String ODISTANCEKEY = "originaldistance";
 
 
 
@@ -67,8 +69,36 @@ public class Utils {
                 .putInt(UidKEY,userid)
                 .putString(UnameKEY,username)
                 .putString(EmailKEY,email)
-                .putString(TokenKey,token)
+                .putString(TokenKEY,token)
                 .apply();
+    }
+
+    //memo: ドライブノートID情報取得(ID)
+    public static Integer getDrivenoteId(Context context){
+        return PreferenceManager.getDefaultSharedPreferences(context)
+                .getInt(DriveNoteIDKEY,-1);
+    }
+
+    //memo: ドライブノートIDの保存
+    public static void setDrivenoteId(Context context, int drivenote_id){
+        PreferenceManager.getDefaultSharedPreferences(context)
+                .edit()
+                .putInt(DriveNoteIDKEY,drivenote_id)
+                .apply();
+    }
+
+    //memo:ユーザーのログアウト
+    public static void removeDrivenoteId(Context context){
+        PreferenceManager.getDefaultSharedPreferences(context)
+                .edit()
+                .remove(DriveNoteIDKEY)
+                .commit();
+    }
+
+    //memo: ユーザーID情報取得(ID)
+    public static Integer getUid(Context context){
+        return PreferenceManager.getDefaultSharedPreferences(context)
+                .getInt(UidKEY,-1);
     }
 
     //memo: ユーザー情報取得(Email)
@@ -80,7 +110,7 @@ public class Utils {
     //memo: ユーザー情報取得(Token)
     public static String getLoggedInUserToken(Context context){
         return PreferenceManager.getDefaultSharedPreferences(context)
-                .getString(TokenKey,"");
+                .getString(TokenKEY,"");
     }
 
     //memo: ユーザー情報取得(Username)
@@ -109,7 +139,7 @@ public class Utils {
                 .edit()
                 .remove(UnameKEY)
                 .remove(EmailKEY)
-                .remove(TokenKey)
+                .remove(TokenKEY)
                 .apply();
     }
 
@@ -121,7 +151,7 @@ public class Utils {
         PreferenceManager.getDefaultSharedPreferences(context)
                 .edit()
                 .putInt(RailsKEY, railsid)
-                .putInt(PositionKey, positionid)
+                .putInt(BranchidKEY, positionid)
                 .putString(DestnameKEY, destname)
                 .putString(DestaddressKEY, destaddress)
                 .putString(DestemailKEY, destemail)
@@ -135,13 +165,19 @@ public class Utils {
         PreferenceManager.getDefaultSharedPreferences(context)
                 .edit()
                 .remove(RailsKEY)
-                .remove(PositionKey)
+                .remove(BranchidKEY)
                 .remove(DestnameKEY)
                 .remove(DestaddressKEY)
                 .remove(DestemailKEY)
                 .remove(DestLatitudeKEY)
                 .remove(DestLongitudeKEY)
                 .commit();
+    }
+
+    //memo:RailsIDの取得
+    public static Integer getDestId(Context context){
+        return PreferenceManager.getDefaultSharedPreferences(context)
+                .getInt(RailsKEY,-1);
     }
 
     //memo:
@@ -176,7 +212,7 @@ public class Utils {
     //memo:　ユーザー存在確認
     public static boolean isEmptyUser(Context context) {
         return PreferenceManager.getDefaultSharedPreferences(context).getString(EmailKEY, "").equals("")
-                && PreferenceManager.getDefaultSharedPreferences(context).getString(TokenKey, "").equals("");
+                && PreferenceManager.getDefaultSharedPreferences(context).getString(TokenKEY, "").equals("");
     }
 
     //memo:　目的地の存在確認
@@ -237,19 +273,18 @@ public class Utils {
     }
 
 
-
+/* onGoingと機能が被ると思うので削除
     public static void setArrivalkey(Context context, Boolean arrival ){
         PreferenceManager.getDefaultSharedPreferences(context)
                 .edit()
                 .putBoolean(ArrivalKEY, arrival)
                 .apply();
-
-
     }
 
     public static boolean getArrival(Context context){
         return PreferenceManager.getDefaultSharedPreferences(context).getBoolean(ArrivalKEY,false);
     }
+*/
     /**
      * Returns the {@code location} object as a human readable string.
      * @param location  The {@link Location}.
@@ -264,6 +299,14 @@ public class Utils {
                 DateFormat.getDateTimeInstance().format(new Date()));
     }
 
+    public static void locationdataalert(Context context){
+        new AlertDialog.Builder(context)
+                .setTitle("お知らせ")
+                .setMessage("通信状況を確認してください。")
+                .setPositiveButton("OK", null)
+                .show();
+    }
+
     static void resetApp(Context context) {
 
         //service を止める
@@ -272,7 +315,6 @@ public class Utils {
         context.stopService(intent);
         setRequestingLocationUpdates(context,false);
         removeThisDest(context);
-        setArrivalkey(context, true);
 
         Toast.makeText(context,"リセットしました。",Toast.LENGTH_SHORT).show();
         Log.d("debug","resetApp");

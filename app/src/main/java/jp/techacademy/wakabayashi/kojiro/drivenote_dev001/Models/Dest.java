@@ -1,4 +1,4 @@
-package jp.techacademy.wakabayashi.kojiro.drivenote_dev001;
+package jp.techacademy.wakabayashi.kojiro.drivenote_dev001.Models;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -15,7 +15,7 @@ public class Dest extends RealmObject implements Serializable {
     // id をプライマリーキーとして設定(Jsonで取得したデータをRealmで内部に保存する。）
     @PrimaryKey
     private Integer id;
-    private Integer position_id;
+    private Integer branch_id;
     private String destname;
     private String destemail;
     private String destaddress;
@@ -32,12 +32,12 @@ public class Dest extends RealmObject implements Serializable {
         this.id = id;
     }
 
-    public int getPositionId(){
-        return position_id;
+    public int getBranchId(){
+        return branch_id;
     }
 
-    public void setPositionId(int position_id){
-        this.position_id = position_id;
+    public void setBranchId(int branch_id){
+        this.branch_id = branch_id;
     }
 
     public String getDestName(){

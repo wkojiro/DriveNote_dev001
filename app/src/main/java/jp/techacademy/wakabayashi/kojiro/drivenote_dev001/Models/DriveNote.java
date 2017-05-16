@@ -1,4 +1,4 @@
-package jp.techacademy.wakabayashi.kojiro.drivenote_dev001;
+package jp.techacademy.wakabayashi.kojiro.drivenote_dev001.Models;
 
 import android.app.Application;
 import android.util.Log;

@@ -5,8 +5,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
-    tools:context="jp.techacademy.wakabayashi.kojiro.drivenote_dev001.MainActivity">
+
+    tools:context="jp.techacademy.wakabayashi.kojiro.drivenote_dev001.Activities.MainActivity">
 
 
     <android.support.design.widget.AppBarLayout
@@ -155,6 +155,7 @@
         android:textAlignment="center"
         android:textSize="15sp"/>
 
+
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recyclerView"
         android:layout_width="match_parent"
@@ -163,5 +164,6 @@
         android:layout_marginTop="?attr/actionBarSize"
         app:layout_behavior="@string/bottom_sheet_behavior"
         app:behavior_peekHeight="80dp"/>
+
 
 </android.support.design.widget.CoordinatorLayout>

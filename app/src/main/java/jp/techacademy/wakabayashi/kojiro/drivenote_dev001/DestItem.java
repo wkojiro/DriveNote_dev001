@@ -11,7 +11,14 @@ public class DestItem {
     public final String destaddress;
 
 
+
+
+
     public DestItem(int n) {
+
+
+
+
         destname = n + "番目の場所";
         email = "ああいいうう（"+ n +"）";
         destaddress = "aiueo"+n;

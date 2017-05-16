@@ -16,7 +16,9 @@ import android.widget.CheckBox;
 import android.widget.TextView;
 
 import java.util.ArrayList;
-import java.util.List;
+
+import jp.techacademy.wakabayashi.kojiro.drivenote_dev001.Activities.SettingActivity;
+import jp.techacademy.wakabayashi.kojiro.drivenote_dev001.Models.Dest;
 
 public class DestAdapter extends BaseAdapter {
 
@@ -36,7 +38,7 @@ public class DestAdapter extends BaseAdapter {
         this.activity = activity;
     }
 
-    protected void setDestArrayList(ArrayList<Dest> destArrayList){
+    public void setDestArrayList(ArrayList<Dest> destArrayList){
         mDestArrayList = destArrayList;
     }
 
@@ -69,7 +71,7 @@ public class DestAdapter extends BaseAdapter {
         TextView textView3 = (TextView) convertView.findViewById(R.id.emailTextView);
         CheckBox checkBox = (CheckBox) convertView.findViewById(R.id.checkBox);
 
-        textView1.setText(mDestArrayList.get(position).getDestName() + mDestArrayList.get(position).getPositionId()+ mDestArrayList.get(position).getId());
+        textView1.setText(mDestArrayList.get(position).getDestName() + mDestArrayList.get(position).getId());
         textView2.setText(mDestArrayList.get(position).getDestAddress());
         textView3.setText(mDestArrayList.get(position).getDestEmail());
 

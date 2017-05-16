@@ -1,4 +1,4 @@
-package jp.techacademy.wakabayashi.kojiro.drivenote_dev001;
+package jp.techacademy.wakabayashi.kojiro.drivenote_dev001.Models;
 
 /**
  * Created by wkojiro on 2017/04/20.
@@ -7,7 +7,7 @@ package jp.techacademy.wakabayashi.kojiro.drivenote_dev001;
 public class User {
 
     private String id;
-    private String username;
+    private String membername;
     private String email;
     private String password;
     private String access_token;
@@ -23,11 +23,11 @@ public class User {
         return id;
     }
     public String getUserName() {
-        return username;
+        return membername;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setUsername(String membername) {
+        this.membername = membername;
     }
 
     public String getEmail() {

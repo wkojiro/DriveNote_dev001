@@ -1,25 +1,15 @@
-package jp.techacademy.wakabayashi.kojiro.drivenote_dev001;
+package jp.techacademy.wakabayashi.kojiro.drivenote_dev001.Activities;
 
 import android.app.AlarmManager;
 import android.app.FragmentManager;
 import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
-import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-import android.graphics.Color;
-import android.graphics.PorterDuff;
-import android.location.Location;
-import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -30,16 +20,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 
-import android.Manifest;
-
-import android.content.pm.PackageManager;
-
-import android.net.Uri;
-
-import android.provider.Settings;
 import android.support.annotation.NonNull;
-import android.support.design.widget.Snackbar;
-import android.support.v4.app.ActivityCompat;
 
 import android.view.Menu;
 import android.view.MenuItem;
@@ -49,18 +30,23 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.maps.MapFragment;
-
 import java.util.ArrayList;
 import java.util.Calendar;
 
 import bolts.Continuation;
 import bolts.Task;
-import jp.techacademy.wakabayashi.kojiro.drivenote_dev001.fragments.BottomSheetFragment;
+import jp.techacademy.wakabayashi.kojiro.drivenote_dev001.ApiBase;
+import jp.techacademy.wakabayashi.kojiro.drivenote_dev001.DestItem;
+import jp.techacademy.wakabayashi.kojiro.drivenote_dev001.DestRecAdapter;
+import jp.techacademy.wakabayashi.kojiro.drivenote_dev001.LocationUpdatesService;
+import jp.techacademy.wakabayashi.kojiro.drivenote_dev001.R;
+import jp.techacademy.wakabayashi.kojiro.drivenote_dev001.Utils;
 import jp.techacademy.wakabayashi.kojiro.drivenote_dev001.fragments.GmapFragment;
 
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener,SharedPreferences.OnSharedPreferenceChangeListener {
+
+
     private static final String TAG = MainActivity.class.getSimpleName();
 
     // Used in checking for runtime permissions.
@@ -70,24 +56,24 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private static final int bid1 = 1;
 
     // The BroadcastReceiver used to listen from broadcasts from the service.
-   // private MyReceiver myReceiver;
+    // private MyReceiver myReceiver;
 
     // A reference to the service used to get location updates.
-   // private LocationUpdatesService mService = null;
+    // private LocationUpdatesService mService = null;
 
     // Tracks the bound state of the service.
-  //  private boolean mBound = false;
+    //  private boolean mBound = false;
 
     // UI elements.
- //   private Button mRequestLocationUpdatesButton;
- //   private Button mRemoveLocationUpdatesButton;
+    //   private Button mRequestLocationUpdatesButton;
+    //   private Button mRemoveLocationUpdatesButton;
 
     private FloatingActionButton mRequestLocationUpdatesButton;
     private FloatingActionButton mRemoveLocationUpdatesButton;
-    private TextView mTextView,mEmailTextView,mUsernameTextView;
-    private ImageView mSignalView01, mSignalView02, mSignalView03,mUserImageView;
-    private AppBarLayout mBarLayout,mBarLayout2;
-    private Toolbar mToolbar,mToolbar2;
+    private TextView mTextView, mEmailTextView, mUsernameTextView;
+    private ImageView mSignalView01, mSignalView02, mSignalView03, mUserImageView;
+    private AppBarLayout mBarLayout, mBarLayout2;
+    private Toolbar mToolbar, mToolbar2;
     private NavigationView navigationView;
 
     private Button mBottomSheetButton;
@@ -100,19 +86,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     // Preference elements
     SharedPreferences sp;
-    private String email,token,destname,destemail,destaddress,latitude,longitude;
+    private String email, token, destname, destemail, destaddress, latitude, longitude;
 
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-       // myReceiver = new MyReceiver();
+        // myReceiver = new MyReceiver();
         setContentView(R.layout.activity_main);
 
         mBarLayout = (AppBarLayout) findViewById(R.id.appbar);
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
 
-        Log.d("debug","user"+Utils.getLoggedInUserEmail(getApplicationContext()));
+        Log.d("debug","user"+ Utils.getLoggedInUserEmail(getApplicationContext()));
 
       //   mEmailTextView.setText(Utils.getLoggedInUserEmail(MainActivity.this));
       //  mUsernameTextView.setText(Utils.getLoggedInUserName(getApplication()));
@@ -121,9 +107,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         mBarLayout2 = (AppBarLayout) findViewById(R.id.appbar2);
         mToolbar2 = (Toolbar) findViewById(R.id.toolbar2);
-
-        //memo:到着フラグの設定
-        Utils.setArrivalkey(getApplicationContext(), false);
 
         setupToolbar();
         setupBottomSheetBehavior();
@@ -134,9 +117,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         sp = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         sp.registerOnSharedPreferenceChangeListener(this);
 
-
         mRequestLocationUpdatesButton = (FloatingActionButton)findViewById(R.id.fab_start);
-
+        mRemoveLocationUpdatesButton = (FloatingActionButton)findViewById(R.id.fab_stop);
         // ナビゲーションドロワーの設定
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, mToolbar, R.string.app_name, R.string.app_name);
@@ -147,7 +129,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         navigationView.setNavigationItemSelectedListener(this);
 
         View header=navigationView.getHeaderView(0);
-/*View view=navigationView.inflateHeaderView(R.layout.nav_header_main);*/
+        /*View view=navigationView.inflateHeaderView(R.layout.nav_header_main);*/
 
         mUsernameTextView = (TextView)header.findViewById(R.id.usernameTextView);
         mEmailTextView = (TextView)header.findViewById(R.id.emailtextView);
@@ -164,14 +146,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             navigationView.getMenu().findItem(R.id.logout).setVisible(true);
         }
 
-
         mSignalView01 = (ImageView) findViewById(R.id.Signal01);
         // mSignalView02 = (ImageView) getActivity().findViewById(R.id.Signal02);
         // mSignalView03 = (ImageView) getActivity().findViewById(R.id.Signal03);
 
         mTextView = (TextView) findViewById(R.id.textView);
       //  mTextView.setText("ddd");
-
 
         FragmentManager fm = getFragmentManager();
         // fm.beginTransaction().replace(R.id.content_frame, new MainFragment()).commit();
@@ -191,10 +171,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
             }
         });
-
         Log.d("debug","bottomSheet"+behavior.isHideable());
-
-
     }
 
     @Override
@@ -293,6 +270,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void setupBottomSheetBehavior() {
+
         behavior = BottomSheetBehavior.from(findViewById(R.id.recyclerView));
         behavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
@@ -301,13 +279,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                 if (newState == BottomSheetBehavior.STATE_DRAGGING) {
 
-                    behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+                  //  behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
                 }
                 if (newState == BottomSheetBehavior.STATE_EXPANDED) {
                     //Collapseは本当はButtonのみに反応させたい。地図が動いてしまうので。
                     behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
                 }
-
+                mRequestLocationUpdatesButton.setEnabled(newState == BottomSheetBehavior.STATE_COLLAPSED || newState == BottomSheetBehavior.STATE_HIDDEN);
+                mRemoveLocationUpdatesButton.setEnabled(newState == BottomSheetBehavior.STATE_COLLAPSED || newState == BottomSheetBehavior.STATE_HIDDEN);
             }
             @Override
             public void onSlide(@NonNull View bottomSheet, float slideOffset) {
@@ -325,10 +304,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void showOrHideBottomSheet(boolean show) {
         if (show) {
             behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+           // behavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
             behavior.setHideable(false);
 
             mBarLayout2.setVisibility(View.VISIBLE);
             mToolbar2.setVisibility(View.VISIBLE);
+
         } else {
             //bottomSheet.setState(BottomSheetBehavior.STATE_HIDDEN);
             behavior.setHideable(true);
@@ -336,11 +317,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             behavior.setState(BottomSheetBehavior.STATE_HIDDEN);
             mBarLayout2.setVisibility(View.GONE);
             mToolbar2.setVisibility(View.GONE);
+
+
         }
     }
 
     private void setupToolbar(){
         // ツールバーをアクションバーとしてセット
+        /**
+         * offset=0: 完全に見せる
+         * offset=1: 完全に画面外
+         */
         mBarLayout.setVisibility(View.VISIBLE);
         mToolbar.setVisibility(View.VISIBLE);
         mToolbar2.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
@@ -362,10 +349,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
 
-    /**
-     * offset=0: 完全に見せる
-     * offset=1: 完全に画面外
-     */
+
     private void setToolbarTranslationOffset(float offset) {
         mBarLayout2.setTranslationY(-mBarLayout2.getHeight() * offset);
         mToolbar2.setTranslationY(-mToolbar2.getHeight() * offset);
@@ -382,6 +366,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         recyclerView.setAdapter(new DestRecAdapter(data));
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
     }
 
     @Override
@@ -418,7 +403,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             startActivity(intent);
             return true;
         }
-
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed(){
+        //memo:ボトムシートが出ているときは引っ込める
+        if(behavior.getState() != BottomSheetBehavior.STATE_HIDDEN){
+             showOrHideBottomSheet(false);
+            return;
+        }
+        super.onBackPressed();
+
     }
 }

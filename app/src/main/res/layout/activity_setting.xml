@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    tools:context="jp.techacademy.wakabayashi.kojiro.drivenote_dev001.SettingActivity">
+    tools:context="jp.techacademy.wakabayashi.kojiro.drivenote_dev001.Activities.SettingActivity">
 
 
     <android.support.design.widget.AppBarLayout

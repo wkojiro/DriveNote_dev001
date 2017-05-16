@@ -8,7 +8,7 @@
               android:paddingLeft="@dimen/activity_horizontal_margin"
               android:paddingRight="@dimen/activity_horizontal_margin"
               android:paddingTop="@dimen/activity_vertical_margin"
-              tools:context="jp.techacademy.wakabayashi.kojiro.drivenote_dev001.LoginActivity">
+              tools:context="jp.techacademy.wakabayashi.kojiro.drivenote_dev001.Activities.LoginActivity">
 
     <!-- Login progress -->
     <ProgressBar

@@ -3,7 +3,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
       xmlns:app="http://schemas.android.com/apk/res-auto"
       xmlns:tools="http://schemas.android.com/tools"
-      tools:context="jp.techacademy.wakabayashi.kojiro.drivenote_dev001.MainActivity">
+      tools:context="jp.techacademy.wakabayashi.kojiro.drivenote_dev001.Activities.MainActivity">
     <item
         android:id="@+id/action_settings"
         android:orderInCategory="100"

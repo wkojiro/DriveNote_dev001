@@ -1,23 +1,18 @@
-package jp.techacademy.wakabayashi.kojiro.drivenote_dev001;
+package jp.techacademy.wakabayashi.kojiro.drivenote_dev001.Activities;
 
 import android.app.ProgressDialog;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
@@ -26,7 +21,6 @@ import android.widget.Toast;
 
 
 import java.util.ArrayList;
-import java.util.List;
 
 
 //Realm関連
@@ -36,6 +30,11 @@ import io.realm.Realm;
 import io.realm.RealmChangeListener;
 import io.realm.RealmResults;
 import io.realm.Sort;
+import jp.techacademy.wakabayashi.kojiro.drivenote_dev001.ApiBase;
+import jp.techacademy.wakabayashi.kojiro.drivenote_dev001.Models.Dest;
+import jp.techacademy.wakabayashi.kojiro.drivenote_dev001.DestAdapter;
+import jp.techacademy.wakabayashi.kojiro.drivenote_dev001.R;
+import jp.techacademy.wakabayashi.kojiro.drivenote_dev001.Utils;
 
 public class SettingActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
 
@@ -107,7 +106,7 @@ public class SettingActivity extends AppCompatActivity implements SharedPreferen
         //memo: API用に取得しておく
         apiusername = sp.getString(Utils.UnameKEY, "");
         apiemail = sp.getString(Utils.EmailKEY, "");
-        apitoken = sp.getString(Utils.TokenKey, "");
+        apitoken = sp.getString(Utils.TokenKEY, "");
 
         //memo: Fixed features
 
@@ -192,7 +191,7 @@ public class SettingActivity extends AppCompatActivity implements SharedPreferen
 
                 dest = (Dest) parent.getAdapter().getItem(position);
 
-                Log.d("PositionID",String.valueOf(dest.getPositionId()));
+                Log.d("BranchID",String.valueOf(dest.getBranchId()));
                 Log.d("id",String.valueOf(dest.getId()));
                 Log.d("name",String.valueOf(dest.getDestName()));
                 Log.d("Url",String.valueOf(dest.getDestUrl()));
@@ -300,7 +299,7 @@ public class SettingActivity extends AppCompatActivity implements SharedPreferen
                 Dest dest = new Dest();
 
                 dest.setId(mDestRealmResults.get(i).getId());
-                dest.setPositionId(mDestRealmResults.get(i).getPositionId());
+                dest.setBranchId(mDestRealmResults.get(i).getBranchId());
                 dest.setDestName(mDestRealmResults.get(i).getDestName());
                 dest.setDestEmail(mDestRealmResults.get(i).getDestEmail());
                 dest.setDestAddress(mDestRealmResults.get(i).getDestAddress());
@@ -403,7 +402,7 @@ public class SettingActivity extends AppCompatActivity implements SharedPreferen
 
         //memo: 目的地を追加する際にすでにある目的地を消し、その後に追加する。
         Utils.removeThisDest(this);
-        Utils.setDestination(this,destRealm.getId(),destRealm.getPositionId(),destRealm.getDestName(),destRealm.getDestAddress(),destRealm.getDestEmail(),destRealm.getDestLatitude(),destRealm.getDestLongitude());
+        Utils.setDestination(this,destRealm.getId(),destRealm.getBranchId(),destRealm.getDestName(),destRealm.getDestAddress(),destRealm.getDestEmail(),destRealm.getDestLatitude(),destRealm.getDestLongitude());
 
         Toast.makeText(this, "目的地を設定しました", Toast.LENGTH_LONG).show();
 

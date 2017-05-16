@@ -1,4 +1,4 @@
-package jp.techacademy.wakabayashi.kojiro.drivenote_dev001;
+package jp.techacademy.wakabayashi.kojiro.drivenote_dev001.Activities;
 
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -18,6 +18,10 @@ import android.widget.Toast;
 import bolts.Continuation;
 import bolts.Task;
 import io.realm.Realm;
+import jp.techacademy.wakabayashi.kojiro.drivenote_dev001.ApiBase;
+import jp.techacademy.wakabayashi.kojiro.drivenote_dev001.Models.Dest;
+import jp.techacademy.wakabayashi.kojiro.drivenote_dev001.R;
+import jp.techacademy.wakabayashi.kojiro.drivenote_dev001.Utils;
 
 public class DestActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener  {
 
@@ -83,7 +87,7 @@ public class DestActivity extends AppCompatActivity implements SharedPreferences
         sp.registerOnSharedPreferenceChangeListener(this);
         username = sp.getString(Utils.UnameKEY, "");
         email = sp.getString(Utils.EmailKEY, "");
-        access_token = sp.getString(Utils.TokenKey, "");
+        access_token = sp.getString(Utils.TokenKEY, "");
 
 
         //memo: 保存されている目的地情報をあらかじめ取得しておく。（用途：　　　）

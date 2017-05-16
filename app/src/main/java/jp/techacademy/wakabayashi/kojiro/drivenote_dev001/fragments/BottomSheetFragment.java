@@ -9,7 +9,6 @@ import android.support.design.widget.BottomSheetDialogFragment;
 import android.support.design.widget.CoordinatorLayout;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 
 import jp.techacademy.wakabayashi.kojiro.drivenote_dev001.R;
 /**
@@ -104,10 +103,5 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
         if( behavior != null && behavior instanceof BottomSheetBehavior ) {
             ((BottomSheetBehavior) behavior).setBottomSheetCallback(mBottomSheetBehaviorCallback);
         }
-
     }
-
-
-
-
 }

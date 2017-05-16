@@ -15,7 +15,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
-import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
@@ -32,6 +31,7 @@ import com.google.android.gms.maps.model.LatLng;
 
 import bolts.Continuation;
 import bolts.Task;
+import jp.techacademy.wakabayashi.kojiro.drivenote_dev001.Activities.MainActivity;
 
 /**
  * A bound and started service that is promoted to a foreground service when location updates have
@@ -254,8 +254,7 @@ public class LocationUpdatesService extends Service implements GoogleApiClient.C
     public void removeLocationUpdates() {
         Log.i(TAG, "Removing location updates");
         try {
-            LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient,
-                    LocationUpdatesService.this);
+            LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient,LocationUpdatesService.this);
             Utils.setRequestingLocationUpdates(this, false);
             stopSelf();
         } catch (SecurityException unlikely) {
@@ -276,8 +275,7 @@ public class LocationUpdatesService extends Service implements GoogleApiClient.C
         intent.putExtra(EXTRA_STARTED_FROM_NOTIFICATION, true);
 
         // The PendingIntent that leads to a call to onStartCommand() in this service.
-        PendingIntent servicePendingIntent = PendingIntent.getService(this, 0, intent,
-                PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent servicePendingIntent = PendingIntent.getService(this, 0, intent,PendingIntent.FLAG_UPDATE_CURRENT);
 
         // The PendingIntent to launch activity.
         //memo: ここでActivityに戻れるが、振り出しに戻ってしまう。（対策として下記を実装）
@@ -289,10 +287,8 @@ public class LocationUpdatesService extends Service implements GoogleApiClient.C
                 new Intent(this, MainActivity.class), 0);
 
         return new NotificationCompat.Builder(this)
-                .addAction(R.drawable.ic_launch, getString(R.string.launch_activity),
-                        activityPendingIntent)
-                .addAction(R.drawable.ic_cancel, getString(R.string.remove_location_updates),
-                        servicePendingIntent)
+                .addAction(R.drawable.ic_launch, getString(R.string.launch_activity),activityPendingIntent)
+                .addAction(R.drawable.ic_cancel, getString(R.string.remove_location_updates),servicePendingIntent)
                 .setContentText(text)
                 .setContentTitle(Utils.getLocationTitle(this))
                 .setOngoing(true)
@@ -340,8 +336,12 @@ public class LocationUpdatesService extends Service implements GoogleApiClient.C
             Log.d("debug","呼ばれるたびにgetDistance");
             //memo: 目的地がないと落ちそう。この設定だと目的地があれば何度もメールを送ることになる。取り合えずこのままにしておく。
 
-            if(Utils.onGoing(getApplicationContext())){
-                postMyPosition(distance);
+            //memo: DriveNoteIDの保存前に発火する分はスルーする。
+            if(Utils.getDrivenoteId(getApplicationContext()) != -1) {
+
+                if (Utils.onGoing(getApplicationContext())) {
+                    postCurrentPosition(mLocation);
+                }
             }
 
             intent.putExtra(EXTRA_DESTANCE, distance);
@@ -467,11 +467,71 @@ public class LocationUpdatesService extends Service implements GoogleApiClient.C
     }
 
 
-    private void postMyPosition(Double nowdistance) {
+    private void postCurrentPosition(Location location){
+
+        final String nowlatitude = String.valueOf(location.getLatitude());
+        final String nowlongitude = String.valueOf(location.getLongitude());
+
+        new ApiBase(getApplicationContext()).postCurrentlocationData(nowlatitude,nowlongitude).onSuccess(new Continuation<String, String>() {
+            @Override
+            public String then(Task<String> task) throws Exception {
+                Log.d("debug","LocationUpdate"+nowlongitude);
+
+                Toast.makeText(getApplicationContext(),"位置情報の更新に成功しました。",Toast.LENGTH_SHORT).show();
+
+                originaldistance = Float.parseFloat(Utils.getOriginalDistance(getApplicationContext()));
+
+                double referencedistance = originaldistance * 0.3;
+                Log.d("debug", "基準距離" + originaldistance);
+                Log.d("debug", "閾値" + referencedistance);
+                Log.d("debug", "現在の距離" + nowdistance);
+
+                double ans = nowdistance - referencedistance;
+
+                if(ans <= 0){
+                    Log.d("debug","0以下");
+                }
+
+                Log.d("debug","answer"+ans);
+
+                destlatitude = Double.parseDouble(Utils.getDestLatitude(getApplicationContext()));
+                destlongitude = Double.parseDouble(Utils.getDestLongitude(getApplicationContext()));
+
+
+
+                if (nowdistance <= 0.08 && arraivalCount == 0  ) {
+                    Toast.makeText(getApplicationContext(), "お疲れ様でした。到着しました", Toast.LENGTH_LONG).show();
+                    finishDrivenote();
+                    arraivalCount = 1;
+                }
+
+
+
+                return null;
+            }
+        }, Task.UI_THREAD_EXECUTOR).continueWith(new Continuation<String, String>() {
+            @Override
+            public String then(Task<String> task) throws Exception {
+                Log.d("Thread","postCurrentPosition"+Thread.currentThread().getName());
+
+                //finish();
+                if (task.isFaulted()) {
+                    Exception e = task.getError();
+                    Log.d("debug2",e.toString());
+                    Log.e("hoge","error", e);
+                    //エラー処理
+                    Toast.makeText(getApplicationContext(),"位置情報の更新に失敗しました。",Toast.LENGTH_SHORT).show();
+                }
+                return null;
+            }
+        }, Task.UI_THREAD_EXECUTOR);
+    }
+
+
+/*
+    private void calMyPosition(Double nowdistance) {
 
         originaldistance = Float.parseFloat(Utils.getOriginalDistance(getApplicationContext()));
-
-        //originaldistance = Utils.getOriginalDistance(getApplicationContext());
 
         double referencedistance = originaldistance * 0.3;
         Log.d("debug", "基準距離" + originaldistance);
@@ -486,11 +546,11 @@ public class LocationUpdatesService extends Service implements GoogleApiClient.C
 
         Log.d("debug","answer"+ans);
 
-
         destlatitude = Double.parseDouble(Utils.getDestLatitude(getApplicationContext()));
         destlongitude = Double.parseDouble(Utils.getDestLongitude(getApplicationContext()));
 
      //   if (nowdistance - referencedistance <= 0 && mailCount == 0) {
+
         if(ans <= 0 && mailCount == 0){
 
             Log.d("debug", "メールまでもう少し" +nowdistance);
@@ -524,8 +584,16 @@ public class LocationUpdatesService extends Service implements GoogleApiClient.C
         }
 
         if (nowdistance <= 0.08 ) {
-            Toast.makeText(getApplicationContext(), "お疲れ様でした。到着しました。", Toast.LENGTH_LONG).show();
-            if(!Utils.getArrival(getApplicationContext())) {
+            Toast.makeText(getApplicationContext(), "お疲れ様でした。到着しました", Toast.LENGTH_LONG).show();
+            finishDrivenote();
+        }
+    }
+    */
+
+    private void finishDrivenote(){
+        new ApiBase(getApplicationContext()).arriveDriveNote().onSuccess(new Continuation<String, String>() {
+            @Override
+            public String then(Task<String> task) throws Exception {
                 final Handler handler = new Handler();
                 handler.postDelayed(new Runnable() {
                     @Override
@@ -533,13 +601,24 @@ public class LocationUpdatesService extends Service implements GoogleApiClient.C
                         Utils.resetApp(getApplicationContext());
                     }
                 }, 10000);
+
+                Log.d("debug","finishDrivenote");
+                return null;
             }
-        }
+        }, Task.UI_THREAD_EXECUTOR).continueWith(new Continuation<String, String>() {
+            @Override
+            public String then(Task<String> task) throws Exception {
+                if (task.isFaulted()) {
+                    Exception e = task.getError();
+                    Log.d("debug2", e.toString());
+                    Log.e("hoge", "error", e);
+                    Log.d("debug", "PostMail : " + task);
+                    Toast.makeText(getApplicationContext(), "DriveNoteの更新にしっぱいしました。", Toast.LENGTH_SHORT).show();
+                }
+                return null;
+            }
+        }, Task.UI_THREAD_EXECUTOR);
+
     }
-
-
-
-
-
 
 }
