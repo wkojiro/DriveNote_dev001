@@ -26,6 +26,7 @@
 
     </android.support.design.widget.AppBarLayout>
 
+    <!--
     <android.support.design.widget.AppBarLayout
         android:id="@+id/appbar2"
         android:layout_width="match_parent"
@@ -45,6 +46,7 @@
             app:subtitleTextColor="@color/colorlightGray"/>
 
     </android.support.design.widget.AppBarLayout>
+    -->
 
 <!-- Gmap -->
     <include layout="@layout/content_main"
@@ -155,7 +157,7 @@
         android:textAlignment="center"
         android:textSize="15sp"/>
 
-
+<!--
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recyclerView"
         android:layout_width="match_parent"
@@ -164,6 +166,8 @@
         android:layout_marginTop="?attr/actionBarSize"
         app:layout_behavior="@string/bottom_sheet_behavior"
         app:behavior_peekHeight="80dp"/>
+        -->
+
 
 
 </android.support.design.widget.CoordinatorLayout>

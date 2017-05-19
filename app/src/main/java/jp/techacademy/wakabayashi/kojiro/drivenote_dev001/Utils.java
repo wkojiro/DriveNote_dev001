@@ -273,7 +273,7 @@ public class Utils {
     }
 
 
-/* onGoingと機能が被ると思うので削除
+// onGoingと機能が被ると思うので削除
     public static void setArrivalkey(Context context, Boolean arrival ){
         PreferenceManager.getDefaultSharedPreferences(context)
                 .edit()
@@ -284,7 +284,7 @@ public class Utils {
     public static boolean getArrival(Context context){
         return PreferenceManager.getDefaultSharedPreferences(context).getBoolean(ArrivalKEY,false);
     }
-*/
+
     /**
      * Returns the {@code location} object as a human readable string.
      * @param location  The {@link Location}.
@@ -307,13 +307,15 @@ public class Utils {
                 .show();
     }
 
-    static void resetApp(Context context) {
+
+    public static void resetApp(Context context) {
 
         //service を止める
         //Destinationを削除する
         Intent intent = new Intent(context, LocationUpdatesService.class);
         context.stopService(intent);
         setRequestingLocationUpdates(context,false);
+        setArrivalkey(context,false);
         removeThisDest(context);
 
         Toast.makeText(context,"リセットしました。",Toast.LENGTH_SHORT).show();

@@ -10,6 +10,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.location.Location;
+import android.media.AudioManager;
+import android.media.SoundPool;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -31,7 +33,9 @@ import com.google.android.gms.maps.model.LatLng;
 
 import bolts.Continuation;
 import bolts.Task;
+import jp.techacademy.wakabayashi.kojiro.drivenote_dev001.Activities.ArrivalActivity;
 import jp.techacademy.wakabayashi.kojiro.drivenote_dev001.Activities.MainActivity;
+import jp.techacademy.wakabayashi.kojiro.drivenote_dev001.Activities.SettingActivity;
 
 /**
  * A bound and started service that is promoted to a foreground service when location updates have
@@ -139,6 +143,12 @@ public class LocationUpdatesService extends Service implements GoogleApiClient.C
      */
     private Location mLocation;
 
+
+    private SoundPool mSoundPool;
+    private int mSoundId;
+
+
+
     public LocationUpdatesService() {
     }
 
@@ -156,6 +166,10 @@ public class LocationUpdatesService extends Service implements GoogleApiClient.C
         handlerThread.start();
         mServiceHandler = new Handler(handlerThread.getLooper());
         mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+
+        // 予め音声データを読み込む
+        mSoundPool = new SoundPool(1, AudioManager.STREAM_MUSIC, 0);
+        mSoundId = mSoundPool.load(getApplicationContext(), R.raw.arraived01, 0);
     }
 
     @Override
@@ -228,6 +242,8 @@ public class LocationUpdatesService extends Service implements GoogleApiClient.C
     public void onDestroy() {
         mServiceHandler.removeCallbacksAndMessages(null);
         mGoogleApiClient.disconnect();
+        // リリース
+        mSoundPool.release();
     }
 
     /**
@@ -497,12 +513,12 @@ public class LocationUpdatesService extends Service implements GoogleApiClient.C
                 destlatitude = Double.parseDouble(Utils.getDestLatitude(getApplicationContext()));
                 destlongitude = Double.parseDouble(Utils.getDestLongitude(getApplicationContext()));
 
-
-
-                if (nowdistance <= 0.08 && arraivalCount == 0  ) {
+                if (nowdistance <= 0.08 && !Utils.getArrival(getApplicationContext())) {
                     Toast.makeText(getApplicationContext(), "お疲れ様でした。到着しました", Toast.LENGTH_LONG).show();
                     finishDrivenote();
-                    arraivalCount = 1;
+                    Utils.setArrivalkey(getApplicationContext(),true);
+
+                    mSoundPool.play(mSoundId, 1.0F, 1.0F, 0, 0, 1.0F);
                 }
 
 
@@ -598,9 +614,15 @@ public class LocationUpdatesService extends Service implements GoogleApiClient.C
                 handler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        Utils.resetApp(getApplicationContext());
+                    Utils.resetApp(getApplicationContext());
                     }
                 }, 10000);
+
+                Intent intent = new Intent().setClass(getApplicationContext(), ArrivalActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+
+// Launch the new activity and add the additional flags to the intent
+                getApplicationContext().startActivity(intent);
 
                 Log.d("debug","finishDrivenote");
                 return null;

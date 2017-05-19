@@ -41,6 +41,7 @@ import jp.techacademy.wakabayashi.kojiro.drivenote_dev001.DestRecAdapter;
 import jp.techacademy.wakabayashi.kojiro.drivenote_dev001.LocationUpdatesService;
 import jp.techacademy.wakabayashi.kojiro.drivenote_dev001.R;
 import jp.techacademy.wakabayashi.kojiro.drivenote_dev001.Utils;
+import jp.techacademy.wakabayashi.kojiro.drivenote_dev001.fragments.FragmentModalBottomSheet;
 import jp.techacademy.wakabayashi.kojiro.drivenote_dev001.fragments.GmapFragment;
 
 
@@ -105,12 +106,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 //memo: 何故INVISIBLEが機能しないか。
 
-        mBarLayout2 = (AppBarLayout) findViewById(R.id.appbar2);
-        mToolbar2 = (Toolbar) findViewById(R.id.toolbar2);
+     //   mBarLayout2 = (AppBarLayout) findViewById(R.id.appbar2);
+     //   mToolbar2 = (Toolbar) findViewById(R.id.toolbar2);
 
-        setupToolbar();
-        setupBottomSheetBehavior();
-        setupRecyclerView();
+      ///  setupToolbar();
+        //setupBottomSheetBehavior();
+       // setupRecyclerView();
         setSupportActionBar(mToolbar);
 
         //memo: Login時に保存したユーザーデータを取得
@@ -164,20 +165,24 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mBottomSheetButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                /*
                 if (!behavior.isHideable()) {
                     showOrHideBottomSheet(false);
                 }else{
                     showOrHideBottomSheet(true);
-                }
+                }*/
+
+                showOrHideBottomSheet(true);
+
             }
         });
-        Log.d("debug","bottomSheet"+behavior.isHideable());
+        //Log.d("debug","bottomSheet"+behavior.isHideable());
     }
 
     @Override
     public void onStart(){
         super.onStart();
-        Log.d("debug","bottomSheet Activity OnStart"+behavior.isHideable());
+      //  Log.d("debug","bottomSheet Activity OnStart"+behavior.isHideable());
 
     }
 
@@ -269,6 +274,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Log.d("debug", "pendingUpdatesはremoveされました");
     }
 
+/*
     private void setupBottomSheetBehavior() {
 
         behavior = BottomSheetBehavior.from(findViewById(R.id.recyclerView));
@@ -301,6 +307,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         showOrHideBottomSheet(false);
     }
 
+    */
+
+/*
     private void showOrHideBottomSheet(boolean show) {
         if (show) {
             behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
@@ -321,13 +330,23 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         }
     }
+    */
 
+    private void showOrHideBottomSheet(boolean show) {
+
+        if(show){
+            FragmentModalBottomSheet fragmentModalBottomSheet = new FragmentModalBottomSheet();
+            fragmentModalBottomSheet.show(getSupportFragmentManager(),"BottomSheet Fragment");
+        }
+    }
+
+/*
     private void setupToolbar(){
         // ツールバーをアクションバーとしてセット
-        /**
-         * offset=0: 完全に見せる
-         * offset=1: 完全に画面外
-         */
+        //
+        // offset=0: 完全に見せる
+        // offset=1: 完全に画面外
+        //
         mBarLayout.setVisibility(View.VISIBLE);
         mToolbar.setVisibility(View.VISIBLE);
         mToolbar2.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
@@ -347,8 +366,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
     }
+*/
 
-
+    /*
 
     private void setToolbarTranslationOffset(float offset) {
         mBarLayout2.setTranslationY(-mBarLayout2.getHeight() * offset);
@@ -367,7 +387,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         recyclerView.setAdapter(new DestRecAdapter(data));
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-    }
+    }*/
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sp, String s) {

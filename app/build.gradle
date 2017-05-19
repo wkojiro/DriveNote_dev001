@@ -28,6 +28,8 @@ dependencies {
     //Boltsを追加してみた
 
     //Boltsを追加してみた
+    
+
     compile 'com.android.support:appcompat-v7:25.2.0'
     compile 'com.android.support.constraint:constraint-layout:1.0.1'
     compile 'com.android.support:design:25.2.0'
@@ -39,7 +41,6 @@ dependencies {
     compile 'com.google.android.gms:play-services-ads:9.0.1'
     compile 'com.parse.bolts:bolts-tasks:1.4.0'
     compile 'com.parse.bolts:bolts-applinks:1.4.0'
-
     compile 'gr.pantrif:easy-android-splash-screen:0.0.1'
     testCompile 'junit:junit:4.12'
 }
