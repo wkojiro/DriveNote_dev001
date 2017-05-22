@@ -200,6 +200,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             startActivity(intent);
         } else if (id == R.id.nav_note) {
 
+
+        } else if (id == R.id.nav_conf) {
+            Intent intent = new Intent(getApplicationContext(), ConfigAppActivity.class);
+            startActivity(intent);
+
+
         } else if (id == R.id.login){
             Intent intent = new Intent(getApplicationContext(),LoginActivity.class);
             startActivity(intent);

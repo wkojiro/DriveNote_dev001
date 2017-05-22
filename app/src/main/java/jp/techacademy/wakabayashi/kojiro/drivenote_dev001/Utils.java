@@ -45,6 +45,8 @@ public class Utils {
     public static final String DriveNoteIDKEY = "drivenote_id";
     public static final String ODISTANCEKEY = "originaldistance";
 
+    public static final String ArrivalMusicKEY = "arrivalmusic";
+
 
 
     //memo:　ask RequestLocationUpdates
@@ -273,7 +275,7 @@ public class Utils {
     }
 
 
-// onGoingと機能が被ると思うので削除
+// onGoingと機能が被ると思うので削除?でも他でも使う。
     public static void setArrivalkey(Context context, Boolean arrival ){
         PreferenceManager.getDefaultSharedPreferences(context)
                 .edit()
@@ -297,6 +299,18 @@ public class Utils {
     static String getLocationTitle(Context context) {
         return context.getString(R.string.location_updated,
                 DateFormat.getDateTimeInstance().format(new Date()));
+    }
+
+
+    public static void setArrivalmusickey(Context context, Boolean arrivalmusic ){
+        PreferenceManager.getDefaultSharedPreferences(context)
+                .edit()
+                .putBoolean(ArrivalMusicKEY, arrivalmusic)
+                .apply();
+    }
+
+    public static boolean getArrivalMusicConfig(Context context){
+        return PreferenceManager.getDefaultSharedPreferences(context).getBoolean(ArrivalMusicKEY,true);
     }
 
     public static void locationdataalert(Context context){

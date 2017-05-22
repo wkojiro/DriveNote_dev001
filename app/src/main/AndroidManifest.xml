@@ -80,6 +80,11 @@
 
         <activity android:name=".Activities.ArrivalActivity">
         </activity>
+        <activity android:name=".Activities.ConfigAppActivity"
+                  android:screenOrientation="portrait"
+            >
+
+        </activity>
     </application>
 
 </manifest>

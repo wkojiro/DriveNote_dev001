@@ -143,8 +143,8 @@ public class LocationUpdatesService extends Service implements GoogleApiClient.C
      */
     private Location mLocation;
 
-
     private SoundPool mSoundPool;
+    private AudioManager audio;
     private int mSoundId;
 
 
@@ -167,6 +167,9 @@ public class LocationUpdatesService extends Service implements GoogleApiClient.C
         mServiceHandler = new Handler(handlerThread.getLooper());
         mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
+        // デバイスの音量を取得
+        audio = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        int ringVol = audio.getStreamVolume(AudioManager.STREAM_RING);
         // 予め音声データを読み込む
         mSoundPool = new SoundPool(1, AudioManager.STREAM_MUSIC, 0);
         mSoundId = mSoundPool.load(getApplicationContext(), R.raw.arraived01, 0);
@@ -518,11 +521,14 @@ public class LocationUpdatesService extends Service implements GoogleApiClient.C
                     finishDrivenote();
                     Utils.setArrivalkey(getApplicationContext(),true);
 
-                    mSoundPool.play(mSoundId, 1.0F, 1.0F, 0, 0, 1.0F);
+                    //memo: 端末の音量と合わせる
+                   // mSoundPool.play(mSoundId, 1.0F, 1.0F, 0, 0, 1.0F);
+
+                    if(Utils.getArrivalMusicConfig(getApplicationContext())) {
+                        int ringVol = audio.getStreamVolume(AudioManager.STREAM_RING);
+                        mSoundPool.play(mSoundId, ringVol, ringVol, 0, 0, 0);
+                    }
                 }
-
-
-
                 return null;
             }
         }, Task.UI_THREAD_EXECUTOR).continueWith(new Continuation<String, String>() {
