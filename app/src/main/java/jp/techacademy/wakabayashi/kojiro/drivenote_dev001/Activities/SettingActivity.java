@@ -197,7 +197,7 @@ public class SettingActivity extends AppCompatActivity implements SharedPreferen
                 Log.d("Url",String.valueOf(dest.getDestUrl()));
 
                 //memo: destのIDを送る
-                Intent intent = new Intent(SettingActivity.this, DestActivity.class);
+                Intent intent = new Intent(SettingActivity.this, DestDetailActivity.class);
                 intent.putExtra(EXTRA_DEST, dest.getId());
                 //startActivity(intent);
                 startActivityForResult(intent,REQUEST_DEST_CODE);
@@ -317,7 +317,6 @@ public class SettingActivity extends AppCompatActivity implements SharedPreferen
 
         } else {
 
-
             Toast.makeText(this, "登録されている目的地がありません。", Toast.LENGTH_LONG).show();
         }
     }
@@ -336,8 +335,6 @@ public class SettingActivity extends AppCompatActivity implements SharedPreferen
         Log.d("debug","SettingActivity: PreferenceChanged");
 
        Log.d("debug","isEmptyDest"+Utils.isEmptyDest(this));
-
-
 
 
     }
@@ -392,6 +389,7 @@ public class SettingActivity extends AppCompatActivity implements SharedPreferen
     }
 
 
+    //addというよりselectがニュアンス的に正しい。
     public void addDestination(Integer selected_id) {
 
         Realm realm = Realm.getDefaultInstance();

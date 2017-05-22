@@ -80,10 +80,17 @@
 
         <activity android:name=".Activities.ArrivalActivity">
         </activity>
-        <activity android:name=".Activities.ConfigAppActivity"
-                  android:screenOrientation="portrait"
+        <activity
+            android:name=".Activities.ConfigAppActivity"
+            android:screenOrientation="portrait">
+        </activity>
+        <activity
+            android:name=".Activities.DestDetailActivity"
+            android:parentActivityName=".Activities.SettingActivity"
             >
-
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".Activities.SettingActivity" />
         </activity>
     </application>
 

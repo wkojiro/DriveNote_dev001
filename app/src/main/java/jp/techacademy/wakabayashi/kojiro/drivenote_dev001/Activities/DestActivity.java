@@ -138,7 +138,6 @@ public class DestActivity extends AppCompatActivity implements SharedPreferences
             mDestAddressText.setText(mDest.getDestAddress());
         }
 
-
         createButton = (Button) findViewById(R.id.createButton);
         createButton.setOnClickListener(new View.OnClickListener() {
             @Override
