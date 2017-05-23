@@ -25,7 +25,10 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import io.realm.Realm;
 import jp.techacademy.wakabayashi.kojiro.drivenote_dev001.Models.Dest;
@@ -37,6 +40,7 @@ public class DestDetailActivity extends AppCompatActivity implements View.OnClic
     private static final LatLng BRISBANE = new LatLng(-27.47093, 153.0235);
     //パーツの定義
     private TextView mDestNameText,mDestEmailText,mDestAddressText;
+    private Double mDestlatitude,mDestlongitude;
     ImageView tapView,tapView2,tapView3,tapView4;
 
     GoogleMap mMap = null;
@@ -61,9 +65,10 @@ public class DestDetailActivity extends AppCompatActivity implements View.OnClic
         tapView3.setOnClickListener(this);
         tapView4.setOnClickListener(this);
         // Get the map and register for the ready callback
-        SupportMapFragment mapFragment =
-                (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+        MapFragment mapFragment =
+                (MapFragment) getFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -96,6 +101,9 @@ public class DestDetailActivity extends AppCompatActivity implements View.OnClic
             mDestNameText.setText(mDest.getDestName());
             mDestEmailText.setText(mDest.getDestEmail());
             mDestAddressText.setText(mDest.getDestAddress());
+
+            mDestlatitude = Double.valueOf(mDest.getDestLatitude());
+            mDestlongitude = Double.valueOf(mDest.getDestLongitude());
         }
 
     }
@@ -104,9 +112,25 @@ public class DestDetailActivity extends AppCompatActivity implements View.OnClic
     public void onMapReady(GoogleMap googleMap) {
         Log.d("onMapReady", "when do you call me?");
         mMap = googleMap;
-        LatLng JAPAN = new LatLng(36, 139);
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(JAPAN, (float) 4.8));
+        LatLng MyDest = new LatLng(mDestlatitude, mDestlongitude);
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(MyDest, (float) 15.8));
         Log.d("debug","defaultMap");
+        UiSettings us = mMap.getUiSettings();
+        us.setMapToolbarEnabled(false);
+
+        setMarker(mDestlatitude, mDestlongitude, mDest.getDestName());
+
+
+    }
+
+
+    private void setMarker(double destlatitude, double destlongitude, String destname) {
+
+        MarkerOptions destMarkerOptions = new MarkerOptions();
+        LatLng destlatlng = new LatLng(destlatitude,destlongitude);
+        destMarkerOptions.position(destlatlng);
+        destMarkerOptions.title(destname);
+        Marker destmarker = mMap.addMarker(destMarkerOptions);
     }
     @Override
     public void onClick(View v) {
