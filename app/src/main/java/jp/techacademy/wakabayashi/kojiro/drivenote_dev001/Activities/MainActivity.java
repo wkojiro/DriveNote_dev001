@@ -27,6 +27,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -96,22 +97,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // myReceiver = new MyReceiver();
         setContentView(R.layout.activity_main);
 
+        View bottomSheet = findViewById( R.id.bottom_sheet );
+
+        LinearLayout linerlayoutView = (LinearLayout) findViewById(R.id.bottomSheetLiner);
+        linerlayoutView.setClickable(true);
+
+
         mBarLayout = (AppBarLayout) findViewById(R.id.appbar);
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
 
         Log.d("debug","user"+ Utils.getLoggedInUserEmail(getApplicationContext()));
 
-      //   mEmailTextView.setText(Utils.getLoggedInUserEmail(MainActivity.this));
-      //  mUsernameTextView.setText(Utils.getLoggedInUserName(getApplication()));
-
-//memo: 何故INVISIBLEが機能しないか。
-
-     //   mBarLayout2 = (AppBarLayout) findViewById(R.id.appbar2);
-     //   mToolbar2 = (Toolbar) findViewById(R.id.toolbar2);
-
-      ///  setupToolbar();
-        //setupBottomSheetBehavior();
-       // setupRecyclerView();
         setSupportActionBar(mToolbar);
 
         //memo: Login時に保存したユーザーデータを取得
@@ -152,37 +148,70 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // mSignalView03 = (ImageView) getActivity().findViewById(R.id.Signal03);
 
         mTextView = (TextView) findViewById(R.id.textView);
-      //  mTextView.setText("ddd");
 
         FragmentManager fm = getFragmentManager();
         // fm.beginTransaction().replace(R.id.content_frame, new MainFragment()).commit();
         fm.beginTransaction().replace(R.id.content_frame, new GmapFragment()).commit();
         Log.d("Activity","onCreate");
 
-        mBottomSheetButton = (Button)findViewById(R.id.bottomsheet);
-        mBottomSheetButton.setText("目的地を設定");
 
-        mBottomSheetButton.setOnClickListener(new View.OnClickListener() {
+        behavior = BottomSheetBehavior.from(bottomSheet);
+        behavior.setPeekHeight(150);
+
+        behavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
-            public void onClick(View v) {
-                /*
-                if (!behavior.isHideable()) {
-                    showOrHideBottomSheet(false);
-                }else{
-                    showOrHideBottomSheet(true);
-                }*/
+            public void onStateChanged(View bottomSheet, int newState) {
+                if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
+                    mRequestLocationUpdatesButton.setVisibility(View.VISIBLE);
+                    mRemoveLocationUpdatesButton.setVisibility(View.VISIBLE);
+                    behavior.setHideable(false);
+                    behavior.setPeekHeight(150);
+                } else if (newState == BottomSheetBehavior.STATE_EXPANDED) {
+                    mRequestLocationUpdatesButton.setVisibility(View.GONE);
+                    mRemoveLocationUpdatesButton.setVisibility(View.GONE);
+                    behavior.setHideable(true);
 
-                showOrHideBottomSheet(true);
+                } else if (newState == BottomSheetBehavior.STATE_DRAGGING) {
+                    mRequestLocationUpdatesButton.setVisibility(View.GONE);
+                    mRemoveLocationUpdatesButton.setVisibility(View.GONE);
+
+                } else if (newState == BottomSheetBehavior.STATE_HIDDEN){
+                    mRequestLocationUpdatesButton.setVisibility(View.VISIBLE);
+                    mRemoveLocationUpdatesButton.setVisibility(View.VISIBLE);
+                }
+
 
             }
+
+            @Override
+            public void onSlide(View bottomSheet, float slideOffset) {
+            }
         });
-        //Log.d("debug","bottomSheet"+behavior.isHideable());
+
+
+
+        linerlayoutView.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(MainActivity.this, "linerlayout click", Toast.LENGTH_SHORT).show();
+                if(!behavior.isHideable()){
+
+                    behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+
+                    Log.d("debug", String.valueOf(behavior.getState()));
+
+                }else{
+
+                    behavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+
+                }
+            }
+        });
     }
 
     @Override
     public void onStart(){
         super.onStart();
-      //  Log.d("debug","bottomSheet Activity OnStart"+behavior.isHideable());
 
     }
 
@@ -338,13 +367,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
     */
 
-    private void showOrHideBottomSheet(boolean show) {
-
-        if(show){
-            FragmentModalBottomSheet fragmentModalBottomSheet = new FragmentModalBottomSheet();
-            fragmentModalBottomSheet.show(getSupportFragmentManager(),"BottomSheet Fragment");
-        }
-    }
 
 /*
     private void setupToolbar(){
@@ -409,6 +431,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             navigationView.getMenu().findItem(R.id.login).setVisible(false);
             navigationView.getMenu().findItem(R.id.logout).setVisible(true);
         }
+
+        /*
+        if(Utils.isEmptyDest(this)) {
+            mBottomSheetButton.setText("目的地を設定する");
+        } else {
+            mBottomSheetButton.setText(Utils.getDestName(this)+"が設定されています。");
+        }*/
+
+
+
     }
 
     @Override
@@ -435,11 +467,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public void onBackPressed(){
         //memo:ボトムシートが出ているときは引っ込める
+
         if(behavior.getState() != BottomSheetBehavior.STATE_HIDDEN){
-             showOrHideBottomSheet(false);
+            behavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
             return;
         }
         super.onBackPressed();
 
     }
+
+
 }
