@@ -298,12 +298,13 @@ public class LocationUpdatesService extends Service implements GoogleApiClient.C
 
         // The PendingIntent to launch activity.
         //memo: ここでActivityに戻れるが、振り出しに戻ってしまう。（対策として下記を実装）
-        Intent MainIntent = new Intent(this,MainActivity.class);
-        MainIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+        Intent MainIntent = getPackageManager()
+                .getLaunchIntentForPackage(getPackageName())
+                .setPackage(null)
+                .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
 
         // The PendingIntent to launch activity.
-        PendingIntent activityPendingIntent = PendingIntent.getActivity(this, 0,
-                new Intent(this, MainActivity.class), 0);
+        PendingIntent activityPendingIntent = PendingIntent.getActivity(this, 0,MainIntent, 0);
 
         return new NotificationCompat.Builder(this)
                 .addAction(R.drawable.ic_launch, getString(R.string.launch_activity),activityPendingIntent)
@@ -314,6 +315,8 @@ public class LocationUpdatesService extends Service implements GoogleApiClient.C
                 .setPriority(Notification.PRIORITY_HIGH)
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setTicker(text)
+
+
                 .setWhen(System.currentTimeMillis()).build();
     }
 
