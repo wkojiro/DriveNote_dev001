@@ -101,7 +101,7 @@ public class GmapFragment extends Fragment implements SharedPreferences.OnShared
 
     private LatLng latlng;
 
-    private TextView mTextView;
+    private TextView mLocationTextView,mStatusTextView;
 
     private String red = "#ff0103";
     private String blue = "#33FFCC";
@@ -190,7 +190,7 @@ public class GmapFragment extends Fragment implements SharedPreferences.OnShared
                 mCurrentLocation = location;
                 mapState();
                // Toast.makeText(context, Utils.getLocationText(mCurrentLocation), Toast.LENGTH_SHORT).show();
-                mTextView.setText(Utils.getLocationText(mCurrentLocation));
+                mLocationTextView.setText(Utils.getLocationText(mCurrentLocation));
             } else{
                 Utils.locationdataalert(getActivity());
             }
@@ -234,7 +234,8 @@ public class GmapFragment extends Fragment implements SharedPreferences.OnShared
         super.onStart();
         Toast.makeText(getActivity(), "OnStart", Toast.LENGTH_SHORT).show();
 
-        mTextView = (TextView) getActivity().findViewById(R.id.textView);
+        mLocationTextView = (TextView) getActivity().findViewById(R.id.locationtextView);
+        mStatusTextView = (TextView) getActivity().findViewById(R.id.statustextView);
         mSignalView01 = (ImageView) getActivity().findViewById(R.id.Signal01);
         navigationView = (NavigationView) getActivity().findViewById(R.id.nav_view);
         mRequestLocationUpdatesButton = (FloatingActionButton) getActivity().findViewById(R.id.fab_start);
@@ -536,27 +537,34 @@ public class GmapFragment extends Fragment implements SharedPreferences.OnShared
                 //mRequestLocationUpdatesButton.setText("ユーザー登録");
                 mSignalView01.setColorFilter(Color.parseColor(yellow), PorterDuff.Mode.SRC_IN);
                 mRemoveLocationUpdatesButton.setEnabled(false);
+                mStatusTextView.setText("");
             } else if (Utils.isEmptyDest(getActivity())) {
                 //ユーザー登録後の流れとして、このButtonとなる。リセット後はRequestも削除されるのでここにはこない。
                 mRequestLocationUpdatesButton.setEnabled(true);
                 //mRequestLocationUpdatesButton.setText("目的地登録");
                 mSignalView01.setColorFilter(Color.parseColor(yellow), PorterDuff.Mode.SRC_IN);
                 mRemoveLocationUpdatesButton.setEnabled(false);
+                mStatusTextView.setText("");
             } else if (!onGoing) {
                 //出発！
                 mRequestLocationUpdatesButton.setEnabled(true);
                 //mRequestLocationUpdatesButton.setText("出発");
                 mSignalView01.setColorFilter(Color.parseColor(blue), PorterDuff.Mode.SRC_IN);
                 mRemoveLocationUpdatesButton.setEnabled(true);
+                mStatusTextView.setText("準備完了");
+
+                mStatusTextView.setTextColor(Color.parseColor("#1E90FF"));
                 //FirstMap()
                 Toast.makeText(getActivity().getApplicationContext(), "目的地をセットしました", Toast.LENGTH_SHORT).show();
             } else {
                 //mail送信
-                //ActiveMap()
+
                 Toast.makeText(getActivity().getApplicationContext(), "計測開始しました！", Toast.LENGTH_SHORT).show();
                 mRequestLocationUpdatesButton.setEnabled(false);
                 mSignalView01.setColorFilter(Color.parseColor(red), PorterDuff.Mode.SRC_IN);
                 //mRequestLocationUpdatesButton.setText("計測中");
+                mStatusTextView.setText("計測中");
+                mStatusTextView.setTextColor(Color.parseColor(red));
                 mRemoveLocationUpdatesButton.setEnabled(true);
             }
             //リセットボタン押したあと.requestingLocationUpdateも削除するため。
@@ -567,18 +575,20 @@ public class GmapFragment extends Fragment implements SharedPreferences.OnShared
                 mSignalView01.setColorFilter(Color.parseColor(yellow), PorterDuff.Mode.SRC_IN);
                 mRemoveLocationUpdatesButton.setEnabled(false);
                 mRemoveLocationUpdatesButton.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorGray)));
-
+                mStatusTextView.setText("");
             } else if (Utils.isEmptyDest(getActivity())) {
                 //リセット後はここにくる。
                 mRequestLocationUpdatesButton.setEnabled(true);
                 //mRequestLocationUpdatesButton.setText("目的地登録");
                 mSignalView01.setColorFilter(Color.parseColor(yellow), PorterDuff.Mode.SRC_IN);
                 mRemoveLocationUpdatesButton.setEnabled(false);
+                mStatusTextView.setText("");
             } else {
                 //
                 mRequestLocationUpdatesButton.setEnabled(true);
                 //mRequestLocationUpdatesButton.setText("目的地を設定");
                 mRemoveLocationUpdatesButton.setEnabled(false);
+                mStatusTextView.setText("");
             }
         }
     }

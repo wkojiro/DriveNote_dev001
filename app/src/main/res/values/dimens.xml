@@ -10,6 +10,14 @@
     <dimen name="nav_header_vertical_spacing">16dp</dimen>
     <dimen name="nav_header_height">160dp</dimen>
     <dimen name="section_text_margin">3dp</dimen>
+    <dimen name="bottom_sheet_margin">5dp</dimen>
     <dimen name="section_image_margin">10dp</dimen>
     <dimen name="custom_peek_height">80dp</dimen>
+
+    <dimen name="h1text">18dp</dimen>
+    <dimen name="h2text">16dp</dimen>
+    <dimen name="h3text">14dp</dimen>
+    <dimen name="h4text">12dp</dimen>
+    <dimen name="h5text">10dp</dimen>
+    <dimen name="h6text">9dp</dimen>
 </resources>

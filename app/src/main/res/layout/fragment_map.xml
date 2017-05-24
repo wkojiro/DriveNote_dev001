@@ -47,16 +47,30 @@
 
                app:layout_anchorGravity="top"/>
 
-           <TextView
-               android:id="@+id/textView"
-               android:layout_width="wrap_content"
-               android:layout_height="wrap_content"/>
-
-
     </LinearLayout>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="25dp"
+        android:layout_marginLeft="5dp"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        android:orientation="vertical">
 
 
+    <TextView
+        android:id="@+id/statustextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        />
+
+    <TextView
+        android:id="@+id/locationtextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+    />
+
+    </LinearLayout>
 <!--
     <LinearLayout
         android:layout_width="match_parent"

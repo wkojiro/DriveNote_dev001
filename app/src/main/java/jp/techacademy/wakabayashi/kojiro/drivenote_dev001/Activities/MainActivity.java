@@ -57,22 +57,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     //alarm Setting for unconnected situation
     private static final int bid1 = 1;
 
-    // The BroadcastReceiver used to listen from broadcasts from the service.
-    // private MyReceiver myReceiver;
-
-    // A reference to the service used to get location updates.
-    // private LocationUpdatesService mService = null;
-
-    // Tracks the bound state of the service.
-    //  private boolean mBound = false;
-
-    // UI elements.
-    //   private Button mRequestLocationUpdatesButton;
-    //   private Button mRemoveLocationUpdatesButton;
-
     private FloatingActionButton mRequestLocationUpdatesButton;
     private FloatingActionButton mRemoveLocationUpdatesButton;
-    private TextView mTextView, mEmailTextView, mUsernameTextView;
+    private TextView mTopTextView,mDestnameTextView,mDestaddressTextView,mDestphoneTextView,mDestanceTextView,mTextView, mEmailTextView, mUsernameTextView;
     private ImageView mSignalView01, mSignalView02, mSignalView03, mUserImageView;
     private AppBarLayout mBarLayout, mBarLayout2;
     private Toolbar mToolbar, mToolbar2;
@@ -103,12 +90,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         linerlayoutView.setClickable(true);
 
 
+        mTopTextView = (TextView) findViewById(R.id.toptextView);
+        //mDestnameTextView = (TextView) findViewById(R.id.destnameTextView);
+        mDestaddressTextView = (TextView) findViewById(R.id.destaddressTextView);
         mBarLayout = (AppBarLayout) findViewById(R.id.appbar);
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
 
         Log.d("debug","user"+ Utils.getLoggedInUserEmail(getApplicationContext()));
 
         setSupportActionBar(mToolbar);
+
+
+        mTopTextView.setText("目的地が設定されていません");
 
         //memo: Login時に保存したユーザーデータを取得
         sp = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
@@ -147,7 +140,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // mSignalView02 = (ImageView) getActivity().findViewById(R.id.Signal02);
         // mSignalView03 = (ImageView) getActivity().findViewById(R.id.Signal03);
 
-        mTextView = (TextView) findViewById(R.id.textView);
+        //mTextView = (TextView) findViewById(R.id.textView);
 
         FragmentManager fm = getFragmentManager();
         // fm.beginTransaction().replace(R.id.content_frame, new MainFragment()).commit();
@@ -156,7 +149,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 
         behavior = BottomSheetBehavior.from(bottomSheet);
-        behavior.setPeekHeight(150);
+        behavior.setPeekHeight(190);
 
         behavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
@@ -165,7 +158,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     mRequestLocationUpdatesButton.setVisibility(View.VISIBLE);
                     mRemoveLocationUpdatesButton.setVisibility(View.VISIBLE);
                     behavior.setHideable(false);
-                    behavior.setPeekHeight(150);
+                    behavior.setPeekHeight(190);
                 } else if (newState == BottomSheetBehavior.STATE_EXPANDED) {
                     mRequestLocationUpdatesButton.setVisibility(View.GONE);
                     mRemoveLocationUpdatesButton.setVisibility(View.GONE);
@@ -174,15 +167,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 } else if (newState == BottomSheetBehavior.STATE_DRAGGING) {
                     mRequestLocationUpdatesButton.setVisibility(View.GONE);
                     mRemoveLocationUpdatesButton.setVisibility(View.GONE);
+                    behavior.setHideable(false);
 
                 } else if (newState == BottomSheetBehavior.STATE_HIDDEN){
                     mRequestLocationUpdatesButton.setVisibility(View.VISIBLE);
                     mRemoveLocationUpdatesButton.setVisibility(View.VISIBLE);
+                    behavior.setHideable(false);
+                    behavior.setPeekHeight(190);
                 }
-
-
             }
-
             @Override
             public void onSlide(View bottomSheet, float slideOffset) {
             }
@@ -196,10 +189,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 Toast.makeText(MainActivity.this, "linerlayout click", Toast.LENGTH_SHORT).show();
                 if(!behavior.isHideable()){
 
-                    behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+                    if(Utils.isEmptyDest(MainActivity.this)) {
 
+                        Intent intent = new Intent(MainActivity.this,SettingActivity.class);
+                        startActivity(intent);
+
+                        Log.d("debug", String.valueOf(behavior.getState()));
+                    } else {
+
+                        behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+                    }
                     Log.d("debug", String.valueOf(behavior.getState()));
-
                 }else{
 
                     behavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
@@ -432,12 +432,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             navigationView.getMenu().findItem(R.id.logout).setVisible(true);
         }
 
-        /*
+
         if(Utils.isEmptyDest(this)) {
-            mBottomSheetButton.setText("目的地を設定する");
+            mTopTextView.setText("目的地が設定されていません");
         } else {
-            mBottomSheetButton.setText(Utils.getDestName(this)+"が設定されています。");
-        }*/
+            mTopTextView.setText("目的地に「"+Utils.getDestName(this)+"」が設定されています。");
+          //  mDestnameTextView.setText(Utils.getDestName(this));
+            mDestaddressTextView.setText(Utils.getDestAddress(this));
+        }
 
 
 
